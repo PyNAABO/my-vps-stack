@@ -26,6 +26,7 @@ services:
 
   filebrowser:
     image: filebrowser/filebrowser
+    user: 0:0
     volumes:
       - /root/Seedbox:/srv
       - ./config/fb/filebrowser.db:/database.db
