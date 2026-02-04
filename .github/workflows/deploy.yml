@@ -13,7 +13,7 @@ jobs:
         with:
           host: ${{ secrets.VPS_IP }}
           username: root
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             # 1. Navigate to project folder
             cd /root/my-vps-stack
