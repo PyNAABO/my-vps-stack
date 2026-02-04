@@ -6,7 +6,7 @@ node_modules/
 npm-debug.log
 .DS_Store
 
-# Ignore Heavy Data (Don't upload movies to GitHub!)
+# Ignore Heavy Data (Don't upload large files to GitHub!)
 downloads/
 config/
 filebrowser.db
