@@ -15,14 +15,15 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # 1. Go to the project folder
             cd /root/my-vps-stack
-            
-            # 2. Get the latest code
             git pull origin main
             
-            # 3. Update the containers (Rebuild if needed)
+            # --- NEW: Pre-flight Setup ---
+            # Ensure the config folder exists
+            mkdir -p config/fb
+            # Create the empty DB file if it doesn't exist yet
+            touch config/fb/filebrowser.db
+            # -----------------------------
+
             docker compose up -d --build --remove-orphans
-            
-            # 4. Clean up old junk images
             docker image prune -f
