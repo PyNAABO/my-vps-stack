@@ -1,6 +1,12 @@
+# Ignore Secrets
 .env
+
+# Ignore Junk
 node_modules/
+npm-debug.log
+.DS_Store
+
+# Ignore Heavy Data (Don't upload movies to GitHub!)
 downloads/
 config/
-*.db
-*.log
+filebrowser.db
