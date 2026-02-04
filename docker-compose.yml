@@ -1,0 +1,43 @@
+version: "3.8"
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    ports: ["5678:5678"]
+    volumes:
+      - n8n_data:/home/node/.n8n
+    environment:
+      - N8N_HOST=${DOMAIN_NAME}
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    environment:
+      - PUID=0
+      - PGID=0
+      - WEBUI_PORT=8080
+    volumes:
+      - ./config/qbit:/config
+      - /root/Seedbox:/downloads  # Points to your existing downloads
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    restart: always
+
+  filebrowser:
+    image: filebrowser/filebrowser
+    volumes:
+      - /root/Seedbox:/srv
+      - ./config/fb/filebrowser.db:/database.db
+      - ./config/fb/settings.json:/config/settings.json
+    ports: ["8081:80"]
+    restart: always
+
+  whatsapp-bot:
+    build: ./whatsapp-bot
+    restart: always
+    # environment:
+    #   - BOT_TOKEN=${BOT_TOKEN}
+
+volumes:
+  n8n_data:
