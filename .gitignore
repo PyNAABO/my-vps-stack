@@ -10,3 +10,8 @@ npm-debug.log
 downloads/
 config/
 filebrowser.db
+
+# WhatsApp Credentials (KEEP PRIVATE)
+whatsapp-bot/auth_info_baileys/
+whatsapp-bot/chat_db.json
+whatsapp-bot/store/
