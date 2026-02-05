@@ -5,15 +5,15 @@ services:
     image: cloudflare/cloudflared
     restart: always
     command: tunnel run
-    # Mount the config file we will generate
     volumes:
       - ./config/tunnel:/etc/cloudflared
     environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+      - NO_AUTOUPDATE=true
     depends_on:
       - filebrowser
       - qbittorrent
       - n8n
+
   n8n:
     image: n8nio/n8n:latest
     restart: always
@@ -31,7 +31,7 @@ services:
       - WEBUI_PORT=8080
     volumes:
       - ./config/qbit:/config
-      - /root/Seedbox:/downloads # Points to your existing downloads
+      - /root/Seedbox:/downloads
     ports:
       - "8080:8080"
       - "6881:6881"
@@ -54,8 +54,6 @@ services:
     volumes:
       - ./whatsapp-bot/auth_info_baileys:/usr/src/app/auth_info_baileys
       - ./whatsapp-bot/chat_db.json:/usr/src/app/chat_db.json
-    # environment:
-    #   - BOT_TOKEN=${BOT_TOKEN}
 
 volumes:
   n8n_data:
