@@ -2,7 +2,7 @@ name: Deploy to VPS
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   deploy:
@@ -17,13 +17,49 @@ jobs:
           script: |
             # 1. Navigate to project folder
             cd /root/my-vps-stack
-            
-            # 2. Pull latest code (Using HTTPS because it's a Public Repo)
+
+            # 2. Pull latest code
             git pull origin main
-            
+
+            # --- DYNAMIC CONFIGURATION (The "Hybrid" Brain) ---
+            mkdir -p config/tunnel
+
+            # Reset .env file
+            echo "" > .env
+
+            # CHECK: Do we have a Domain and Token?
+            if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_TOKEN }}" ]; then
+              echo "✅ Hybrid Mode: Domain detected (${{ secrets.DOMAIN }}). Generating Tunnel Config..."
+              
+              # 1. Generate Cloudflare Ingress Map
+              cat <<EOF > config/tunnel/config.yml
+            tunnel: ${{ secrets.TUNNEL_ID }}
+            credentials-file: /etc/cloudflared/cert.json
+
+            ingress:
+              - hostname: drive.${{ secrets.DOMAIN }}
+                service: http://filebrowser:80
+              - hostname: seed.${{ secrets.DOMAIN }}
+                service: http://qbittorrent:8080
+              - hostname: n8n.${{ secrets.DOMAIN }}
+                service: http://n8n:5678
+              - service: http_status:404
+            EOF
+
+              # 2. Inject Secrets into .env for Docker
+              echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" >> .env
+              echo "DOMAIN_NAME=${{ secrets.DOMAIN }}" >> .env
+              
+            else
+              echo "⚠️ Basic Mode: No Domain found. Falling back to IP address."
+              # Inject empty vars to prevent Docker crashes
+              echo "TUNNEL_TOKEN=" >> .env
+              echo "DOMAIN_NAME=localhost" >> .env
+            fi
+
             # --- AUTO-HEAL: FILEBROWSER CONFIG ---
             mkdir -p config/fb
-            
+
             # Force strict settings so it finds the DB correctly
             cat <<EOF > config/fb/settings.json
             {
@@ -33,58 +69,45 @@ jobs:
               "root": "/srv"
             }
             EOF
-            
-            # Initialize DB + Admin User if missing (Prevents crash on new VPS)
+
+            # Initialize DB + Admin User if missing
             if [ ! -s config/fb/filebrowser.db ]; then
-              echo "Initializing new database..."
+              echo "Initializing new FileBrowser database..."
               touch config/fb/filebrowser.db
               chmod 666 config/fb/filebrowser.db
               
-              # Init Database Structure
               docker run --rm \
                 -v $(pwd)/config/fb/filebrowser.db:/database.db \
                 -v $(pwd)/config/fb/settings.json:/config/settings.json \
                 filebrowser/filebrowser config init
               
-              # Create Admin User (admin / adminadmin1234)
               docker run --rm \
                 -v $(pwd)/config/fb/filebrowser.db:/database.db \
                 -v $(pwd)/config/fb/settings.json:/config/settings.json \
                 filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
             fi
-            
+
             # --- AUTO-HEAL: QBITTORRENT CONFIG ---
             mkdir -p config/qbit/qBittorrent
-            
-            # Inject persistent password config if it doesn't exist
+
             if [ ! -f config/qbit/qBittorrent/qBittorrent.conf ]; then
               echo "Injecting qBittorrent config..."
               cat <<EOF > config/qbit/qBittorrent/qBittorrent.conf
             [LegalNotice]
             Accepted=true
-
-            [Network]
-            Cookies=@Invalid()
-
             [Preferences]
             Connection\PortRangeMin=6881
             Connection\UPnP=false
             Downloads\SavePath=/downloads/
-            Downloads\TempPath=/downloads/incomplete/
             WebUI\Address=*
-            # Password: adminadmin1234
             WebUI\Password_PBKDF2="@ByteArray(xWEWNv2w/RrX3U4SEv80AA==:iKoFnRYgZ8UwWr2eXzdpsJfzQB/VxCcVh94rzujswL/DBy8ZWfN7qioHbyIGakAyXxwhhXSvArxgfnT+hAOJTA==)"
             WebUI\Port=8080
             WebUI\Username=admin
             EOF
             fi
 
-            # --- SECRETS INJECTION ---
-            # Create .env file from GitHub Secrets (for Tunnel Token, etc)
-            echo "TUNNEL_TOKEN=${{ secrets.TUNNEL_TOKEN }}" > .env
-            
             # 3. Build and Start Containers
             docker compose up -d --build --remove-orphans
-            
-            # 4. Cleanup old images to save disk space
+
+            # 4. Cleanup old images
             docker image prune -f
