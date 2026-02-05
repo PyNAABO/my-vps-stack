@@ -37,6 +37,9 @@ services:
   whatsapp-bot:
     build: ./whatsapp-bot
     restart: always
+    volumes:
+      - ./whatsapp-bot/auth_info_baileys:/usr/src/app/auth_info_baileys
+      - ./whatsapp-bot/chat_db.json:/usr/src/app/chat_db.json
     # environment:
     #   - BOT_TOKEN=${BOT_TOKEN}
 
