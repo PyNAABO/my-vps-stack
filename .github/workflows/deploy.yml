@@ -16,8 +16,9 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /root/my-vps-stack
-            # 1. Update Code
-            git pull origin main
+            # 1. Update Code (force reset to handle local changes)
+            git fetch origin main
+            git reset --hard origin/main
 
             # 2. Setup Directories & Env
             mkdir -p config/tunnel
@@ -28,24 +29,22 @@ jobs:
               echo "✅ Local Mode: Generating Tunnel Config..."
               echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
 
-              cat > config/tunnel/config.yml << 'TUNNEL_EOF'
-              tunnel: ${{ secrets.TUNNEL_ID }}
-              credentials-file: /etc/cloudflared/cert.json
-              ingress:
-                - hostname: docker.${{ secrets.DOMAIN }}
-                  service: http://portainer:9000
-                - hostname: status.${{ secrets.DOMAIN }}
-                  service: http://uptime-kuma:3001
-                - hostname: drive.${{ secrets.DOMAIN }}
-                  service: http://filebrowser:80
-                - hostname: seed.${{ secrets.DOMAIN }}
-                  service: http://qbittorrent:8080
-                - hostname: n8n.${{ secrets.DOMAIN }}
-                  service: http://n8n:5678
-                - service: http_status:404
-              TUNNEL_EOF
-              # Strip leading whitespace from config file
-              sed -i 's/^              //' config/tunnel/config.yml
+              printf '%s\n' \
+                "tunnel: ${{ secrets.TUNNEL_ID }}" \
+                "credentials-file: /etc/cloudflared/cert.json" \
+                "ingress:" \
+                "  - hostname: docker.${{ secrets.DOMAIN }}" \
+                "    service: http://portainer:9000" \
+                "  - hostname: status.${{ secrets.DOMAIN }}" \
+                "    service: http://uptime-kuma:3001" \
+                "  - hostname: drive.${{ secrets.DOMAIN }}" \
+                "    service: http://filebrowser:80" \
+                "  - hostname: seed.${{ secrets.DOMAIN }}" \
+                "    service: http://qbittorrent:8080" \
+                "  - hostname: n8n.${{ secrets.DOMAIN }}" \
+                "    service: http://n8n:5678" \
+                "  - service: http_status:404" \
+                > config/tunnel/config.yml
 
               echo "DOMAIN_NAME=${{ secrets.DOMAIN }}" >> .env
             else
