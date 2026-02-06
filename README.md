@@ -181,3 +181,9 @@ source ~/.bashrc
 | :----------------- | :------------------------- |
 | `DOMAIN_NAME`      | `secrets.DOMAIN`           |
 | `ALLOWED_GROUP_ID` | `secrets.ALLOWED_GROUP_ID` |
+| `PUID`             | `secrets.PUID` (Optional)  |
+| `PGID`             | `secrets.PGID` (Optional)  |
+
+> [!IMPORTANT]
+> **File Permissions**: The `filebrowser` container now runs as a non-root user (default 1000:1000) for security. If you have existing files owned by root in your data directories, you may need to run:
+> `chown -R 1000:1000 /opt/seedbox`

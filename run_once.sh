@@ -16,8 +16,8 @@ fi
 chmod +x "$CURRENT_DIR/update.sh"
 
 # 3. Check if alias already exists to avoid duplicates
-if grep -q "alias update=" ~/.bashrc; then
-    echo "⚠️  Alias 'update' already exists in .bashrc. Skipping."
+if grep -q "# Custom VPS Update Shortcut" ~/.bashrc; then
+    echo "⚠️  Update shortcut already exists in .bashrc. Skipping."
 else
     # 3. Add the alias to .bashrc
     echo "" >> ~/.bashrc

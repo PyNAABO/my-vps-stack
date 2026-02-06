@@ -29,86 +29,95 @@ async function safeSend(sock, jid, content) {
   }
 }
 
-async function connectToWhatsApp() {
+async function startBot() {
   const { state, saveCreds } = await useMultiFileAuthState("auth_info_baileys");
 
-  const sock = makeWASocket({
-    logger: pino({ level: "silent" }),
-    printQRInTerminal: false,
-    auth: state,
-    markOnlineOnConnect: false,
-    syncFullHistory: false,
-  });
+  async function connectToWhatsApp() {
+    const sock = makeWASocket({
+      logger: pino({ level: "silent" }),
+      printQRInTerminal: false,
+      auth: state,
+      markOnlineOnConnect: false,
+      syncFullHistory: false,
+    });
 
-  sock.ev.on("connection.update", async (update) => {
-    const { connection, lastDisconnect, qr } = update;
+    sock.ev.on("connection.update", async (update) => {
+      const { connection, lastDisconnect, qr } = update;
 
-    if (qr) {
-      console.log("Scan this:");
-      qrcode.generate(qr, { small: true });
-    }
+      if (qr) {
+        console.log("Scan this:");
+        qrcode.generate(qr, { small: true });
+      }
 
-    if (connection === "close") {
-      const shouldReconnect =
-        lastDisconnect?.error?.output?.statusCode !==
-        DisconnectReason.loggedOut;
-      if (shouldReconnect) connectToWhatsApp();
-    } else if (connection === "open") {
-      console.log(`✅ System Online. Listening in: ${ALLOWED_GROUP_ID}`);
-      // Send startup notification to group
-      await safeSend(sock, ALLOWED_GROUP_ID, {
-        text: "🤖 Bot is Active & Listening",
-      });
-      await safeSend(sock, ALLOWED_GROUP_ID, { text: HELP_MENU });
-    }
-  });
-
-  sock.ev.on("creds.update", saveCreds);
-
-  sock.ev.on("messages.upsert", async ({ messages }) => {
-    const msg = messages[0];
-    if (!msg.message || !msg.key.remoteJid) return;
-
-    const remoteJid = msg.key.remoteJid;
-    const text =
-      msg.message.conversation || msg.message.extendedTextMessage?.text || "";
-
-    // --- FILTER ---
-    if (remoteJid !== ALLOWED_GROUP_ID) return;
-    if (!text.startsWith(".")) return;
-
-    const command = text.slice(1).trim().toLowerCase();
-    if (!command) return; // Ignore lone "."
-    console.log(`[CMD] ${command}`);
-
-    switch (command) {
-      case "ping":
-        await safeSend(sock, remoteJid, { text: "Pong! 🏓" });
-        break;
-
-      case "start":
-        await safeSend(sock, remoteJid, {
+      if (connection === "close") {
+        const shouldReconnect =
+          lastDisconnect?.error?.output?.statusCode !==
+          DisconnectReason.loggedOut;
+        if (shouldReconnect) {
+          console.log("⏳ Reconnecting...");
+          connectToWhatsApp();
+        }
+      } else if (connection === "open") {
+        console.log(`✅ System Online. Listening in: ${ALLOWED_GROUP_ID}`);
+        // Send startup notification to group
+        await safeSend(sock, ALLOWED_GROUP_ID, {
           text: "🤖 Bot is Active & Listening",
         });
-        break;
+        await safeSend(sock, ALLOWED_GROUP_ID, { text: HELP_MENU });
+      }
+    });
 
-      case "time":
-        const now = new Date().toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        });
-        await safeSend(sock, remoteJid, { text: `🕒 ${now}` });
-        break;
+    sock.ev.on("creds.update", saveCreds);
 
-      case "help":
-        await safeSend(sock, remoteJid, { text: HELP_MENU });
-        break;
+    sock.ev.on("messages.upsert", async ({ messages }) => {
+      const msg = messages[0];
+      if (!msg.message || !msg.key.remoteJid) return;
 
-      default:
-        await safeSend(sock, remoteJid, {
-          text: `❓ Unknown command: .${command}\nType .help for available commands.`,
-        });
-    }
-  });
+      const remoteJid = msg.key.remoteJid;
+      const text =
+        msg.message.conversation || msg.message.extendedTextMessage?.text || "";
+
+      // --- FILTER ---
+      // Strict check but allowing for basic JID matching
+      if (remoteJid !== ALLOWED_GROUP_ID) return;
+
+      if (!text.startsWith(".")) return;
+
+      const command = text.slice(1).trim().toLowerCase();
+      if (!command) return;
+      console.log(`[CMD] ${command}`);
+
+      switch (command) {
+        case "ping":
+          await safeSend(sock, remoteJid, { text: "Pong! 🏓" });
+          break;
+
+        case "start":
+          await safeSend(sock, remoteJid, {
+            text: "🤖 Bot is Active & Listening",
+          });
+          break;
+
+        case "time":
+          const now = new Date().toLocaleString("en-IN", {
+            timeZone: "Asia/Kolkata",
+          });
+          await safeSend(sock, remoteJid, { text: `🕒 ${now}` });
+          break;
+
+        case "help":
+          await safeSend(sock, remoteJid, { text: HELP_MENU });
+          break;
+
+        default:
+          await safeSend(sock, remoteJid, {
+            text: `❓ Unknown command: .${command}\nType .help for available commands.`,
+          });
+      }
+    });
+  }
+
+  connectToWhatsApp();
 }
 
-connectToWhatsApp();
+startBot();

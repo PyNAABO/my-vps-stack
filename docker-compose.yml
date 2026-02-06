@@ -61,7 +61,7 @@ services:
 
   filebrowser:
     image: filebrowser/filebrowser
-    user: 0:0 # Run as root for full /srv access
+    user: ${PUID:-1000}:${PGID:-1000} # Run as non-root user (default 1000:1000)
     volumes:
       - /opt/seedbox:/srv
       - ./config/fb/filebrowser.db:/database.db

@@ -6,6 +6,15 @@ DEST_REMOTE="gdrive:VPS_Backup"
 FILTER_FILE="/root/my-vps-stack/backup_filter.txt"
 LOG_FILE="/var/log/rclone_backup.log"
 
+# Strict error handling
+set -e
+
+# Validate filter file
+if [ ! -f "$FILTER_FILE" ]; then
+  echo "❌ Filter file not found: $FILTER_FILE"
+  exit 1
+fi
+
 echo "☁️ Starting Cloud Backup at $(date)..."
 
 # Sync each source directory
