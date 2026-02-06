@@ -28,29 +28,31 @@ jobs:
               echo "✅ Local Mode: Generating Tunnel Config..."
               echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
 
-              # CRITICAL FIX: The content below must be flush left (no indentation)
               cat <<EOF > config/tunnel/config.yml
-            tunnel: ${{ secrets.TUNNEL_ID }}
-            credentials-file: /etc/cloudflared/cert.json
-            ingress:
-              - hostname: docker.${{ secrets.DOMAIN }}
-                service: http://portainer:9000
-              - hostname: status.${{ secrets.DOMAIN }}
-                service: http://uptime-kuma:3001
-              - hostname: drive.${{ secrets.DOMAIN }}
-                service: http://filebrowser:80
-              - hostname: seed.${{ secrets.DOMAIN }}
-                service: http://qbittorrent:8080
-              - hostname: n8n.${{ secrets.DOMAIN }}
-                service: http://n8n:5678
-              - service: http_status:404
-            EOF
+tunnel: ${{ secrets.TUNNEL_ID }}
+credentials-file: /etc/cloudflared/cert.json
+ingress:
+  - hostname: docker.${{ secrets.DOMAIN }}
+    service: http://portainer:9000
+  - hostname: status.${{ secrets.DOMAIN }}
+    service: http://uptime-kuma:3001
+  - hostname: drive.${{ secrets.DOMAIN }}
+    service: http://filebrowser:80
+  - hostname: seed.${{ secrets.DOMAIN }}
+    service: http://qbittorrent:8080
+  - hostname: n8n.${{ secrets.DOMAIN }}
+    service: http://n8n:5678
+  - service: http_status:404
+EOF
 
               echo "DOMAIN_NAME=${{ secrets.DOMAIN }}" >> .env
             else
               echo "⚠️ Fallback Mode"
               echo "DOMAIN_NAME=localhost" >> .env
             fi
+
+            # 3b. Inject WhatsApp Bot Config
+            echo "ALLOWED_GROUP_ID=${{ secrets.ALLOWED_GROUP_ID }}" >> .env
 
             # 4. Generate FileBrowser Settings
             mkdir -p config/fb

@@ -5,10 +5,17 @@ CURRENT_DIR=$(pwd)
 
 echo "⚙️  Setting up 'update' alias..."
 
-# 1. Make the update script executable
+# 1. Check if update.sh exists
+if [ ! -f "$CURRENT_DIR/update.sh" ]; then
+    echo "❌ Error: update.sh not found in $CURRENT_DIR"
+    echo "   Please create update.sh or remove this script."
+    exit 1
+fi
+
+# 2. Make the update script executable
 chmod +x "$CURRENT_DIR/update.sh"
 
-# 2. Check if alias already exists to avoid duplicates
+# 3. Check if alias already exists to avoid duplicates
 if grep -q "alias update=" ~/.bashrc; then
     echo "⚠️  Alias 'update' already exists in .bashrc. Skipping."
 else

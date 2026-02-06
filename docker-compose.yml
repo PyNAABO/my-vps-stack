@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   portainer:
     image: portainer/portainer-ce:latest
@@ -39,7 +38,7 @@ services:
   n8n:
     image: n8nio/n8n:latest
     restart: always
-    ports: ["5678:5678"]
+    ports: [ "5678:5678" ]
     volumes:
       - n8n_data:/home/node/.n8n
     environment:
@@ -48,12 +47,12 @@ services:
   qbittorrent:
     image: lscr.io/linuxserver/qbittorrent:latest
     environment:
-      - PUID=0
-      - PGID=0
+      - PUID=1000
+      - PGID=1000
       - WEBUI_PORT=8080
     volumes:
       - ./config/qbit:/config
-      - /root/Seedbox:/downloads
+      - /opt/seedbox:/downloads
     ports:
       - "8080:8080"
       - "6881:6881"
@@ -64,15 +63,17 @@ services:
     image: filebrowser/filebrowser
     user: 0:0
     volumes:
-      - /root/Seedbox:/srv
+      - /opt/seedbox:/srv
       - ./config/fb/filebrowser.db:/database.db
       - ./config/fb/settings.json:/config/settings.json
-    ports: ["8081:80"]
+    ports: [ "8081:80" ]
     restart: always
 
   whatsapp-bot:
     build: ./whatsapp-bot
     restart: always
+    environment:
+      - ALLOWED_GROUP_ID=${ALLOWED_GROUP_ID}
     volumes:
       - ./whatsapp-bot/auth_info_baileys:/usr/src/app/auth_info_baileys
       - ./whatsapp-bot/chat_db.json:/usr/src/app/chat_db.json
