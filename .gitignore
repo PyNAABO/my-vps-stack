@@ -9,6 +9,7 @@ npm-debug.log
 # Ignore Heavy Data (Don't upload large files to GitHub!)
 downloads/
 config/
+!config/backup_filter.txt
 filebrowser.db
 
 # WhatsApp Credentials (KEEP PRIVATE)

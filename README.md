@@ -145,17 +145,17 @@ docker compose up -d
 
 ## **🛠️ Utility Scripts**
 
-| Script            | Description                                                 |
-| :---------------- | :---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `run_once.sh`     | Sets up the `update` alias in `.bashrc`                     |
-| `update.sh`       | System update script (apt update/upgrade/autoremove)        |
-| `cloud_backup.sh` | Syncs `/root` and `/opt/seedbox` to Google Drive via rclone | \r\n\r\n> 📦 **Setting up a seedbox?** See [Seedbox.md](Seedbox.md) for detailed qBittorrent + FileBrowser setup instructions. |
+| Script                    | Description                                                 |
+| :------------------------ | :---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/run_once.sh`     | Sets up the `update` alias in `.bashrc`                     |
+| `scripts/update.sh`       | System update script (apt update/upgrade/autoremove)        |
+| `scripts/cloud_backup.sh` | Syncs `/root` and `/opt/seedbox` to Google Drive via rclone | \r\n\r\n> 📦 **Setting up a seedbox?** See [docs/Seedbox.md](docs/Seedbox.md) for detailed qBittorrent + FileBrowser setup instructions. |
 
 ### Setting Up the Update Alias
 
 ```bash
-chmod +x run_once.sh
-./run_once.sh
+chmod +x scripts/run_once.sh
+./scripts/run_once.sh
 source ~/.bashrc
 # Now you can just type 'update' to update the system
 ```
@@ -164,12 +164,12 @@ source ~/.bashrc
 
 1. **Install rclone:** `sudo apt install rclone`
 2. **Configure Google Drive:** `rclone config` (follow prompts to add `gdrive` remote)
-3. **Edit paths if needed:** Modify `SOURCE_DIRS` in `cloud_backup.sh`
-4. **Run manually:** `./cloud_backup.sh`
+3. **Edit paths if needed:** Modify `SOURCE_DIRS` in `scripts/cloud_backup.sh`
+4. **Run manually:** `./scripts/cloud_backup.sh`
 5. **Schedule with cron (optional):**
    ```bash
    crontab -e
-   # Add: 0 3 * * * /root/my-vps-stack/cloud_backup.sh
+   # Add: 0 3 * * * /root/my-vps-stack/scripts/cloud_backup.sh
    ```
 
 ## **📁 Environment Variables**

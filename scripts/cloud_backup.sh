@@ -3,7 +3,7 @@
 # Configuration
 SOURCE_DIRS=("/root" "/opt/seedbox")
 DEST_REMOTE="gdrive:VPS_Backup"
-FILTER_FILE="/root/my-vps-stack/backup_filter.txt"
+FILTER_FILE="$(dirname "$0")/../config/backup_filter.txt"
 LOG_FILE="/var/log/rclone_backup.log"
 
 # Strict error handling
