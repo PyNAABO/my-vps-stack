@@ -14,6 +14,15 @@ services:
       - qbittorrent
       - n8n
 
+  uptime-kuma:
+    image: louislam/uptime-kuma:1
+    container_name: uptime-kuma
+    restart: always
+    volumes:
+      - uptime-kuma-data:/app/data
+    ports:
+      - "3001:3001"
+
   n8n:
     image: n8nio/n8n:latest
     restart: always
@@ -57,3 +66,4 @@ services:
 
 volumes:
   n8n_data:
+  uptime-kuma-data:

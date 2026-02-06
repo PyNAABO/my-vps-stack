@@ -30,6 +30,8 @@ jobs:
             credentials-file: /etc/cloudflared/cert.json
 
             ingress:
+              - hostname: status.${{ secrets.DOMAIN }}
+                service: http://uptime-kuma:3001
               - hostname: drive.${{ secrets.DOMAIN }}
                 service: http://filebrowser:80
               - hostname: seed.${{ secrets.DOMAIN }}
