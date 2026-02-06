@@ -24,7 +24,7 @@ async function connectToWhatsApp() {
     syncFullHistory: false,
   });
 
-  sock.ev.on("connection.update", (update) => {
+  sock.ev.on("connection.update", async (update) => {
     const { connection, lastDisconnect, qr } = update;
 
     if (qr) {
@@ -39,6 +39,12 @@ async function connectToWhatsApp() {
       if (shouldReconnect) connectToWhatsApp();
     } else if (connection === "open") {
       console.log(`✅ System Online. Listening in: ${ALLOWED_GROUP_ID}`);
+      // Send startup notification to group
+      const menu = `📜 *Commands:*\n.ping - Check connection\n.time - Check India time\n.start - Check status\n.help - Show this menu`;
+      await sock.sendMessage(ALLOWED_GROUP_ID, {
+        text: "🤖 Bot is Active & Listening",
+      });
+      await sock.sendMessage(ALLOWED_GROUP_ID, { text: menu });
     }
   });
 
@@ -78,7 +84,7 @@ async function connectToWhatsApp() {
         break;
 
       case "help":
-        const menu = `📜 *Commands:*\n.ping - Check connection\n.time - Check India time\n.start - Check status`;
+        const menu = `📜 *Commands:*\n.ping - Check connection\n.time - Check India time\n.start - Check status\n.help - Show this menu`;
         await sock.sendMessage(remoteJid, { text: menu });
         break;
     }
