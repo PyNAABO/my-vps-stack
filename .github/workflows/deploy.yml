@@ -16,19 +16,22 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /root/my-vps-stack
+            # 1. Update Code
             git pull origin main
 
+            # 2. Setup Directories & Env
             mkdir -p config/tunnel
             echo "" > .env
 
+            # 3. Generate Tunnel Config
             if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_CREDENTIALS }}" ]; then
               echo "✅ Local Mode: Generating Tunnel Config..."
               echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
 
+              # CRITICAL FIX: The content below must be flush left (no indentation)
               cat <<EOF > config/tunnel/config.yml
             tunnel: ${{ secrets.TUNNEL_ID }}
             credentials-file: /etc/cloudflared/cert.json
-
             ingress:
               - hostname: docker.${{ secrets.DOMAIN }}
                 service: http://portainer:9000
@@ -49,6 +52,7 @@ jobs:
               echo "DOMAIN_NAME=localhost" >> .env
             fi
 
+            # 4. Generate FileBrowser Settings
             mkdir -p config/fb
             cat <<EOF > config/fb/settings.json
             {
@@ -59,6 +63,7 @@ jobs:
             }
             EOF
 
+            # 5. Initialize FileBrowser DB if missing
             if [ ! -s config/fb/filebrowser.db ]; then
               touch config/fb/filebrowser.db
               chmod 666 config/fb/filebrowser.db
@@ -66,6 +71,7 @@ jobs:
               docker run --rm -v $(pwd)/config/fb/filebrowser.db:/database.db -v $(pwd)/config/fb/settings.json:/config/settings.json filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
             fi
 
+            # 6. Configure qBittorrent
             mkdir -p config/qbit/qBittorrent
             if [ ! -f config/qbit/qBittorrent/qBittorrent.conf ]; then
               cat <<EOF > config/qbit/qBittorrent/qBittorrent.conf
@@ -77,6 +83,7 @@ jobs:
             EOF
             fi
 
+            # 7. Deployment
             sysctl -w net.core.rmem_max=2500000 || true
             docker compose up -d --build --remove-orphans
             docker image prune -f
