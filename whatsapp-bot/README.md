@@ -25,7 +25,7 @@ Set the target group via environment variable in `docker-compose.yml`:
 whatsapp-bot:
   build: ./whatsapp-bot
   environment:
-    - ALLOWED_GROUP_ID=120363407989591305@g.us
+    - ALLOWED_GROUP_ID=YOUR_GROUP_ID@g.us
 ```
 
 ## Getting Your Group ID

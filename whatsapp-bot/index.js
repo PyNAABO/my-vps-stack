@@ -13,6 +13,22 @@ if (!ALLOWED_GROUP_ID) {
   process.exit(1);
 }
 
+// Command help menu (DRY: single source of truth)
+const HELP_MENU = `📜 *Commands:*
+.ping - Check connection
+.time - Check India time
+.start - Check status
+.help - Show this menu`;
+
+// Helper to send messages with error handling
+async function safeSend(sock, jid, content) {
+  try {
+    await sock.sendMessage(jid, content);
+  } catch (err) {
+    console.error(`❌ Failed to send message to ${jid}:`, err.message);
+  }
+}
+
 async function connectToWhatsApp() {
   const { state, saveCreds } = await useMultiFileAuthState("auth_info_baileys");
 
@@ -40,11 +56,10 @@ async function connectToWhatsApp() {
     } else if (connection === "open") {
       console.log(`✅ System Online. Listening in: ${ALLOWED_GROUP_ID}`);
       // Send startup notification to group
-      const menu = `📜 *Commands:*\n.ping - Check connection\n.time - Check India time\n.start - Check status\n.help - Show this menu`;
-      await sock.sendMessage(ALLOWED_GROUP_ID, {
+      await safeSend(sock, ALLOWED_GROUP_ID, {
         text: "🤖 Bot is Active & Listening",
       });
-      await sock.sendMessage(ALLOWED_GROUP_ID, { text: menu });
+      await safeSend(sock, ALLOWED_GROUP_ID, { text: HELP_MENU });
     }
   });
 
@@ -63,15 +78,16 @@ async function connectToWhatsApp() {
     if (!text.startsWith(".")) return;
 
     const command = text.slice(1).trim().toLowerCase();
+    if (!command) return; // Ignore lone "."
     console.log(`[CMD] ${command}`);
 
     switch (command) {
       case "ping":
-        await sock.sendMessage(remoteJid, { text: "Pong! 🏓" });
+        await safeSend(sock, remoteJid, { text: "Pong! 🏓" });
         break;
 
       case "start":
-        await sock.sendMessage(remoteJid, {
+        await safeSend(sock, remoteJid, {
           text: "🤖 Bot is Active & Listening",
         });
         break;
@@ -80,13 +96,17 @@ async function connectToWhatsApp() {
         const now = new Date().toLocaleString("en-IN", {
           timeZone: "Asia/Kolkata",
         });
-        await sock.sendMessage(remoteJid, { text: `🕒 ${now}` });
+        await safeSend(sock, remoteJid, { text: `🕒 ${now}` });
         break;
 
       case "help":
-        const menu = `📜 *Commands:*\n.ping - Check connection\n.time - Check India time\n.start - Check status\n.help - Show this menu`;
-        await sock.sendMessage(remoteJid, { text: menu });
+        await safeSend(sock, remoteJid, { text: HELP_MENU });
         break;
+
+      default:
+        await safeSend(sock, remoteJid, {
+          text: `❓ Unknown command: .${command}\nType .help for available commands.`,
+        });
     }
   });
 }

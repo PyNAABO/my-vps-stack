@@ -61,7 +61,7 @@ services:
 
   filebrowser:
     image: filebrowser/filebrowser
-    user: 0:0
+    user: 0:0 # Run as root for full /srv access
     volumes:
       - /opt/seedbox:/srv
       - ./config/fb/filebrowser.db:/database.db
@@ -76,7 +76,6 @@ services:
       - ALLOWED_GROUP_ID=${ALLOWED_GROUP_ID}
     volumes:
       - ./whatsapp-bot/auth_info_baileys:/usr/src/app/auth_info_baileys
-      - ./whatsapp-bot/chat_db.json:/usr/src/app/chat_db.json
 
 volumes:
   n8n_data:
