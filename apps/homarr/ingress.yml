@@ -1,0 +1,2 @@
+hostname: home
+service: http://homarr:7575

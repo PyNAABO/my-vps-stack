@@ -1,0 +1,14 @@
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    container_name: changedetection
+    restart: always
+    volumes:
+      - changedetection_data:/datastore
+    ports:
+      - "5000:5000"
+    environment:
+      - BASE_URL=https://watch.${DOMAIN_NAME}
+
+volumes:
+  changedetection_data:

@@ -2,9 +2,9 @@
 """Simple Telegram Bot for VPS Stack"""
 
 import os
+import sys
 import logging
 from datetime import datetime
-import subprocess
 
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
@@ -25,9 +25,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "👋 *VPS Bot Online!*\n\n"
         "Commands:\n"
         "/ping - Check if bot is alive\n"
-        "/time - Current server time\n"
-        "/uptime - Server uptime\n"
-        "/containers - List running containers",
+        "/time - Current server time",
         parse_mode="Markdown"
     )
 
@@ -40,32 +38,11 @@ async def time_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     await update.message.reply_text(f"🕐 Server Time: `{now}`", parse_mode="Markdown")
 
-async def uptime(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Show server uptime."""
-    try:
-        result = subprocess.run(["uptime", "-p"], capture_output=True, text=True)
-        uptime_str = result.stdout.strip() or "Unknown"
-    except Exception:
-        uptime_str = "Unable to fetch uptime"
-    await update.message.reply_text(f"⏱️ {uptime_str}")
-
-async def containers(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """List running Docker containers."""
-    try:
-        result = subprocess.run(
-            ["docker", "ps", "--format", "{{.Names}}: {{.Status}}"],
-            capture_output=True, text=True
-        )
-        container_list = result.stdout.strip() or "No containers running"
-    except Exception:
-        container_list = "Unable to fetch containers"
-    await update.message.reply_text(f"📦 *Running Containers:*\n```\n{container_list}\n```", parse_mode="Markdown")
-
 def main() -> None:
     """Start the bot."""
     if not TOKEN:
         logger.error("TG_BOT_TOKEN not set!")
-        return
+        sys.exit(1)
 
     app = Application.builder().token(TOKEN).build()
 
@@ -73,8 +50,6 @@ def main() -> None:
     app.add_handler(CommandHandler("help", start))
     app.add_handler(CommandHandler("ping", ping))
     app.add_handler(CommandHandler("time", time_cmd))
-    app.add_handler(CommandHandler("uptime", uptime))
-    app.add_handler(CommandHandler("containers", containers))
 
     logger.info("Bot starting...")
     app.run_polling(allowed_updates=Update.ALL_TYPES)

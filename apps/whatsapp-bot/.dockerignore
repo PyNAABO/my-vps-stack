@@ -1,0 +1,15 @@
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+
+# Auth data (mounted as volume)
+auth_info_baileys/
+store/
+
+# Misc
+*.md
+*.log
+chat_db.json

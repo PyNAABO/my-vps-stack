@@ -120,7 +120,7 @@ async function startBot() {
   connectToWhatsApp();
 }
 
-const botInstance = startBot();
+startBot();
 
 // Graceful shutdown handlers
 const shutdown = (signal) => {

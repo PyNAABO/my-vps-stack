@@ -1,0 +1,2 @@
+hostname: watch
+service: http://changedetection:5000

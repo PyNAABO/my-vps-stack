@@ -1,0 +1,12 @@
+services:
+  homarr:
+    image: ghcr.io/homarr-labs/homarr:latest
+    container_name: homarr
+    restart: always
+    volumes:
+      - homarr_data:/appdata
+    ports:
+      - "7575:7575"
+
+volumes:
+  homarr_data:

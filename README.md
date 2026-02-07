@@ -68,6 +68,12 @@ my-vps-stack/
 
 > The deploy workflow auto-generates `docker-compose.yml` from all `apps/*/docker-compose.yml` files.
 
+> [!IMPORTANT]
+> **If your app needs secrets** (API keys, tokens, etc.), you must:
+>
+> 1. Add the secret to GitHub Repository Settings → Secrets
+> 2. Edit `.github/workflows/deploy.yml` to inject it into `.env` (see Step 5 in the script)
+
 ## **➖ Removing an App**
 
 1. Delete the app folder from `apps/`
@@ -127,6 +133,9 @@ Create a wildcard CNAME: `*` → `<UUID>.cfargotunnel.com`
    - **Auto-generates tunnel config** from `apps/*/ingress.yml`
    - Runs `apps/*/init.sh` scripts
    - Rebuilds changed containers
+
+> [!WARNING]
+> **The deploy workflow runs `git reset --hard`** on the VPS, which **wipes any local changes** (hot-fixes, manual config tweaks). Always commit changes back to the repo—never edit files directly on the VPS.
 
 ## **🐛 Troubleshooting**
 
