@@ -15,6 +15,28 @@
         box-sizing: border-box;
       }
 
+      :root {
+        --bg: #0f0f0f;
+        --tile-bg: linear-gradient(145deg, #1a1a1a, #141414);
+        --tile-border: #2a2a2a;
+        --text: #fff;
+        --text-muted: #666;
+        --accent: #7c3aed;
+        --accent-glow: rgba(124, 58, 237, 0.3);
+      }
+
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f5f5f5;
+          --tile-bg: linear-gradient(145deg, #fff, #f0f0f0);
+          --tile-border: #e0e0e0;
+          --text: #1a1a1a;
+          --text-muted: #888;
+          --accent: #7c3aed;
+          --accent-glow: rgba(124, 58, 237, 0.2);
+        }
+      }
+
       html,
       body {
         height: 100%;
@@ -23,8 +45,8 @@
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
-        background: #0f0f0f;
-        color: #fff;
+        background: var(--bg);
+        color: var(--text);
       }
 
       body {
@@ -42,7 +64,7 @@
       h1 {
         font-size: clamp(1.5rem, 4vw, 2.5rem);
         font-weight: 700;
-        background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+        background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -65,22 +87,22 @@
         align-items: center;
         justify-content: center;
         gap: 1rem;
-        background: linear-gradient(145deg, #1a1a1a, #141414);
-        border: 1px solid #2a2a2a;
+        background: var(--tile-bg);
+        border: 1px solid var(--tile-border);
         border-radius: 20px;
         text-decoration: none;
-        color: #fff;
+        color: var(--text);
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
       }
 
       .tile:hover {
         transform: scale(1.03);
-        border-color: #7c3aed;
+        border-color: var(--accent);
         box-shadow:
-          0 0 0 1px #7c3aed,
-          0 20px 40px -10px rgba(124, 58, 237, 0.3),
-          0 4px 12px rgba(0, 0, 0, 0.5);
+          0 0 0 1px var(--accent),
+          0 20px 40px -10px var(--accent-glow),
+          0 4px 12px rgba(0, 0, 0, 0.15);
       }
 
       .tile:active {
@@ -101,10 +123,9 @@
       footer {
         text-align: center;
         font-size: 0.75rem;
-        color: #666;
+        color: var(--text-muted);
       }
 
-      /* Dynamic grid based on item count - JS will add class */
       .grid.few-items {
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       }
@@ -140,7 +161,6 @@
     <footer>Auto-generated</footer>
 
     <script>
-      // Adjust grid for few items
       const grid = document.getElementById("grid");
       if (grid.children.length <= 4) grid.classList.add("few-items");
     </script>
