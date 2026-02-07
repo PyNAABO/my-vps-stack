@@ -4,142 +4,126 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <style>
-      :root {
-        --bg-primary: #0a0a0f;
-        --bg-secondary: #12121a;
-        --bg-card: rgba(255, 255, 255, 0.03);
-        --border: rgba(255, 255, 255, 0.08);
-        --text-primary: #ffffff;
-        --text-secondary: rgba(255, 255, 255, 0.6);
-        --accent: #6366f1;
-        --accent-glow: rgba(99, 102, 241, 0.4);
-      }
-
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      html,
       body {
+        height: 100%;
         font-family:
           "Inter",
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
-        background: var(--bg-primary);
+        background: #0f0f0f;
+        color: #fff;
+      }
+
+      body {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
         min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 3rem 1.5rem;
-        background-image:
-          radial-gradient(
-            ellipse 80% 50% at 50% -20%,
-            rgba(99, 102, 241, 0.15),
-            transparent
-          ),
-          radial-gradient(
-            ellipse 60% 40% at 100% 100%,
-            rgba(139, 92, 246, 0.1),
-            transparent
-          );
+        padding: 2rem;
+        gap: 2rem;
       }
 
       header {
         text-align: center;
-        margin-bottom: 3rem;
       }
 
       h1 {
-        color: var(--text-primary);
-        font-size: 1.75rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-      }
-
-      .subtitle {
-        color: var(--text-secondary);
-        font-size: 0.875rem;
-        margin-top: 0.5rem;
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-weight: 700;
+        background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 1rem;
-        max-width: 720px;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        align-content: center;
         width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
       }
 
       .tile {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.5rem 1rem;
-        text-align: center;
+        aspect-ratio: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        background: linear-gradient(145deg, #1a1a1a, #141414);
+        border: 1px solid #2a2a2a;
+        border-radius: 20px;
         text-decoration: none;
-        color: var(--text-primary);
-        transition: all 0.2s ease;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .tile::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          135deg,
-          rgba(99, 102, 241, 0.1),
-          transparent
-        );
-        opacity: 0;
-        transition: opacity 0.2s;
+        color: #fff;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
       }
 
       .tile:hover {
-        border-color: rgba(99, 102, 241, 0.3);
-        transform: translateY(-2px);
+        transform: scale(1.03);
+        border-color: #7c3aed;
         box-shadow:
-          0 8px 24px rgba(0, 0, 0, 0.4),
-          0 0 0 1px rgba(99, 102, 241, 0.1);
+          0 0 0 1px #7c3aed,
+          0 20px 40px -10px rgba(124, 58, 237, 0.3),
+          0 4px 12px rgba(0, 0, 0, 0.5);
       }
 
-      .tile:hover::before {
-        opacity: 1;
+      .tile:active {
+        transform: scale(0.98);
       }
 
       .tile-icon {
-        font-size: 2rem;
-        margin-bottom: 0.75rem;
-        position: relative;
+        font-size: clamp(3rem, 8vw, 4.5rem);
+        line-height: 1;
       }
 
       .tile-name {
-        font-weight: 500;
-        font-size: 0.9rem;
-        position: relative;
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        font-weight: 600;
+        opacity: 0.9;
       }
 
       footer {
-        margin-top: 3rem;
-        color: var(--text-secondary);
+        text-align: center;
         font-size: 0.75rem;
+        color: #666;
       }
 
-      @media (max-width: 480px) {
+      /* Dynamic grid based on item count - JS will add class */
+      .grid.few-items {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      .grid.few-items .tile {
+        aspect-ratio: 1.2;
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding: 1rem;
+          gap: 1rem;
+        }
         .grid {
           grid-template-columns: repeat(2, 1fr);
+          gap: 1rem;
         }
-        h1 {
-          font-size: 1.5rem;
+        .tile {
+          border-radius: 16px;
+          aspect-ratio: 1;
         }
       }
     </style>
@@ -147,13 +131,18 @@
   <body>
     <header>
       <h1>Dashboard</h1>
-      <p class="subtitle">Quick access to your services</p>
     </header>
 
-    <div class="grid">
+    <div class="grid" id="grid">
       <!-- TILES -->
     </div>
 
-    <footer>Auto-generated on deploy</footer>
+    <footer>Auto-generated</footer>
+
+    <script>
+      // Adjust grid for few items
+      const grid = document.getElementById("grid");
+      if (grid.children.length <= 4) grid.classList.add("few-items");
+    </script>
   </body>
 </html>
