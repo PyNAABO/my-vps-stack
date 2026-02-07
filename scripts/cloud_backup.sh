@@ -6,8 +6,9 @@ DEST_REMOTE="gdrive:VPS_Backup"
 FILTER_FILE="$(dirname "$0")/../config/backup_filter.txt"
 LOG_FILE="/var/log/rclone_backup.log"
 
-# Strict error handling
+# Strict error handling with trap
 set -e
+trap 'echo "❌ Backup FAILED at $(date). Check $LOG_FILE for details." >&2; exit 1' ERR
 
 # Validate filter file
 if [ ! -f "$FILTER_FILE" ]; then

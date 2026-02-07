@@ -9,7 +9,7 @@
 - **/*.zip
 - **/*.part*
 
-# --- EXCLUDE HEAVY MEDIA (Optional - Uncomment if you want to skip movies) ---
+# --- EXCLUDE HEAVY MEDIA (Optional - Uncomment if you want to skip downloads) ---
 # - Seedbox/downloads/**
 
 # --- INCLUDE EVERYTHING ELSE ---

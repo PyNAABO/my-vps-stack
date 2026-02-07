@@ -146,10 +146,12 @@ docker compose up -d
 ## **🛠️ Utility Scripts**
 
 | Script                    | Description                                                 |
-| :------------------------ | :---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| :------------------------ | :---------------------------------------------------------- |
 | `scripts/run_once.sh`     | Sets up the `update` alias in `.bashrc`                     |
 | `scripts/update.sh`       | System update script (apt update/upgrade/autoremove)        |
-| `scripts/cloud_backup.sh` | Syncs `/root` and `/opt/seedbox` to Google Drive via rclone | \r\n\r\n> 📦 **Setting up a seedbox?** See [docs/Seedbox.md](docs/Seedbox.md) for detailed qBittorrent + FileBrowser setup instructions. |
+| `scripts/cloud_backup.sh` | Syncs `/root` and `/opt/seedbox` to Google Drive via rclone |
+
+> 📦 **Setting up a seedbox?** See [docs/Seedbox.md](docs/Seedbox.md) for detailed qBittorrent + FileBrowser setup instructions.
 
 ### Setting Up the Update Alias
 

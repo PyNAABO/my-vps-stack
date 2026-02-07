@@ -6,6 +6,12 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
+# Root check
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}❌ This script must be run as root.${NC}"
+    exit 1
+fi
+
 echo -e "${YELLOW}🚀 Starting System Update...${NC}"
 
 # 1. Update the list of available packages

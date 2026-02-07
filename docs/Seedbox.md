@@ -112,7 +112,7 @@ sudo ufw allow 8081/tcp  # FileBrowser UI
 sudo ufw allow 6881      # Torrent Traffic
 ```
 
-#### �️ Dashboard Access
+#### 🖥️ Dashboard Access
 
 | Service         | URL                     | Default User | Default Password        |
 | :-------------- | :---------------------- | :----------- | :---------------------- |

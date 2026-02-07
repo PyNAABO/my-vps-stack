@@ -120,4 +120,13 @@ async function startBot() {
   connectToWhatsApp();
 }
 
-startBot();
+const botInstance = startBot();
+
+// Graceful shutdown handlers
+const shutdown = (signal) => {
+  console.log(`\n⚠️ Received ${signal}. Shutting down gracefully...`);
+  process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
