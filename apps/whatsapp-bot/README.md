@@ -6,7 +6,7 @@ A simple WhatsApp bot built with [Baileys](https://github.com/WhiskeySockets/Bai
 
 - **Persistent session** — Scan QR once, stays logged in via Docker volume
 - **Group-locked** — Only responds to commands in the configured group
-- **Lightweight** — Runs on Node.js Alpine image
+- **Lightweight** — Runs on Node.js Alpine image (~55MB)
 
 ## Commands
 
@@ -43,5 +43,16 @@ Send any message to a group while this is running, and the group ID will be prin
 | -------------------- | ----------------------------------------- |
 | `index.js`           | Main bot logic                            |
 | `get_id.js`          | Helper to discover group IDs              |
-| `Dockerfile`         | Container build config                    |
+| `Dockerfile`         | Node.js 20 Alpine container               |
+| `.dockerignore`      | Excludes unnecessary files from build     |
 | `auth_info_baileys/` | Session data (auto-generated, gitignored) |
+
+## First-Time Setup
+
+1. Deploy the stack: `docker compose up -d`
+2. View QR code: `docker logs -f whatsapp-bot`
+3. Scan QR with your WhatsApp mobile app
+4. Bot will confirm connection in the configured group
+
+> [!NOTE]
+> The session persists across restarts via the mounted `auth_info_baileys/` volume. You only need to scan QR once.

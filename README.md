@@ -33,20 +33,24 @@ my-vps-stack/
 
 ## **🛠️ The Stack**
 
-| App                   | Subdomain | Internal Port | Default Credentials       |
-| :-------------------- | :-------- | :------------ | :------------------------ |
-| **Portainer**         | docker.\* | :9000         | _(Setup on first launch)_ |
-| **Uptime Kuma**       | status.\* | :3001         | _(Setup on first launch)_ |
-| **FileBrowser**       | drive.\*  | :8081         | admin / adminadmin1234    |
-| **qBittorrent**       | seed.\*   | :8080         | admin / adminadmin1234    |
-| **WhatsApp Bot**      | -         | -             | _(Scan QR once)_          |
-| **Cloudflare Tunnel** | -         | -             | _(Exposes services)_      |
+| App                   | Subdomain | Description                   | Default Credentials       |
+| :-------------------- | :-------- | :---------------------------- | :------------------------ |
+| **Homarr**            | home.\*   | Dashboard / Homepage          | _(Setup on first launch)_ |
+| **Portainer**         | docker.\* | Docker management UI          | _(Setup on first launch)_ |
+| **Uptime Kuma**       | status.\* | Service monitoring            | _(Setup on first launch)_ |
+| **Dozzle**            | logs.\*   | Real-time container logs      | _(No auth needed)_        |
+| **FileBrowser**       | drive.\*  | File manager / Streamer       | _(See init.sh)_           |
+| **qBittorrent**       | seed.\*   | Torrent client                | _(Check docker logs)_     |
+| **Change Detection**  | watch.\*  | Website change monitoring     | _(Setup on first launch)_ |
+| **Telegram Bot**      | -         | VPS commands via Telegram     | _(Token in secrets)_      |
+| **WhatsApp Bot**      | -         | Group commands via WhatsApp   | _(Scan QR once)_          |
+| **Cloudflare Tunnel** | -         | Exposes all services securely | _(Auto-configured)_       |
 
 > [!TIP]
 > Apps in `apps/.archive/` are excluded from builds. Move folders out of `.archive/` to re-enable them.
 
 > [!CAUTION]
-> **Change the default passwords immediately after first login!**
+> **Change default passwords immediately after first login!**
 
 ## **➕ Adding a New App**
 
@@ -83,13 +87,13 @@ my-vps-stack/
 
 1. **OS:** Ubuntu 22.04 / 24.04 LTS
 2. **Dependencies:** git, curl, docker & docker compose (v2.20+)
-3. **Firewall:** Ensure ports 8080, 8081, 5678, 22 are open
+3. **Firewall:** SSH (22) must be open. Other ports are tunneled via Cloudflare.
 
 ## **⚡ Installation**
 
 ```bash
 cd /root
-git clone https://github.com/YOUR_USERNAME/my-vps-stack.git
+git clone https://github.com/PyNAABO/my-vps-stack.git
 cd my-vps-stack
 docker compose up -d
 ```
@@ -115,14 +119,15 @@ Create a wildcard CNAME: `*` → `<UUID>.cfargotunnel.com`
 
 ### **3. GitHub Secrets**
 
-| Secret                 | Description                       |
-| :--------------------- | :-------------------------------- |
-| **VPS_IP**             | Your VPS IP                       |
-| **VPS_SSH_KEY**        | Private key from step 1           |
-| **DOMAIN**             | Your domain (e.g., example.com)   |
-| **TUNNEL_ID**          | UUID from cloudflared             |
-| **TUNNEL_CREDENTIALS** | JSON content from ~/.cloudflared/ |
-| **ALLOWED_GROUP_ID**   | WhatsApp Group ID for bot         |
+| Secret                 | Description                          |
+| :--------------------- | :----------------------------------- |
+| **VPS_IP**             | Your VPS IP address                  |
+| **VPS_SSH_KEY**        | Private key from step 1              |
+| **DOMAIN**             | Your domain (e.g., example.com)      |
+| **TUNNEL_ID**          | UUID from cloudflared                |
+| **TUNNEL_CREDENTIALS** | JSON content from ~/.cloudflared/    |
+| **TG_BOT_TOKEN**       | Telegram bot token from @BotFather   |
+| **ALLOWED_GROUP_ID**   | WhatsApp Group ID (format: xxx@g.us) |
 
 ## **🚀 Usage**
 
@@ -171,4 +176,5 @@ docker compose up -d
 | Variable           | Source                     |
 | :----------------- | :------------------------- |
 | `DOMAIN_NAME`      | `secrets.DOMAIN`           |
+| `TG_BOT_TOKEN`     | `secrets.TG_BOT_TOKEN`     |
 | `ALLOWED_GROUP_ID` | `secrets.ALLOWED_GROUP_ID` |

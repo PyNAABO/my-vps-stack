@@ -1,27 +1,25 @@
 # 🤖 Telegram Bot
 
-A simple Telegram bot for VPS monitoring and quick commands.
+A lightweight Telegram bot for basic VPS interactions.
 
 ## Commands
 
-| Command       | Description                           |
-| ------------- | ------------------------------------- |
-| `/start`      | Show welcome message and command list |
-| `/ping`       | Check if bot is alive                 |
-| `/time`       | Get current server time               |
-| `/uptime`     | Show server uptime                    |
-| `/containers` | List running Docker containers        |
+| Command  | Description                           |
+| -------- | ------------------------------------- |
+| `/start` | Show welcome message and command list |
+| `/help`  | Same as /start                        |
+| `/ping`  | Check if bot is alive                 |
+| `/time`  | Get current server time               |
 
 ### BotFather Setup
 
 Send this to [@BotFather](https://t.me/BotFather) via `/setcommands`:
 
 ```
-start - Show welcome message and command list
+start - Show welcome message
+help - Show command list
 ping - Check if bot is alive
 time - Get current server time
-uptime - Show server uptime
-containers - List running Docker containers
 ```
 
 ## Configuration
