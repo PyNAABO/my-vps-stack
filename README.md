@@ -41,7 +41,6 @@ my-vps-stack/
 | **Dozzle**            | logs.\*   | Real-time container logs      | _(No auth needed)_        |
 | **FileBrowser**       | drive.\*  | File manager / Streamer       | _(See init.sh)_           |
 | **qBittorrent**       | seed.\*   | Torrent client                | _(Check docker logs)_     |
-| **Change Detection**  | watch.\*  | Website change monitoring     | _(Setup on first launch)_ |
 | **Telegram Bot**      | -         | VPS commands via Telegram     | _(Token in secrets)_      |
 | **WhatsApp Bot**      | -         | Group commands via WhatsApp   | _(Scan QR once)_          |
 | **Cloudflare Tunnel** | -         | Exposes all services securely | _(Auto-configured)_       |
