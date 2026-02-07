@@ -1,0 +1,2 @@
+hostname: tools
+service: http://it-tools:80

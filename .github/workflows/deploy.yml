@@ -67,8 +67,9 @@ jobs:
               echo "DOMAIN_NAME=localhost" >> .env
             fi
 
-            # 5. Inject WhatsApp Bot Config
+            # 5. Inject Bot Configs
             echo "ALLOWED_GROUP_ID=${{ secrets.ALLOWED_GROUP_ID }}" >> .env
+            echo "TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}" >> .env
 
             # 6. Run init scripts for each app (first-time setup)
             for init_script in apps/*/init.sh; do
