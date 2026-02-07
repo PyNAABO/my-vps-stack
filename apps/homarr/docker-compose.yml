@@ -4,7 +4,7 @@ services:
     container_name: homarr
     restart: always
     environment:
-      - SECRET_ENCRYPTION_KEY=your_super_secret_key_change_this_64_chars_minimum_length_here
+      - SECRET_ENCRYPTION_KEY=puNfx1JyTrswzoqEcXY3W5kFlO2M8BDGIZ0PvmjbdtH6RnC97Qhag4LUiAKeVS
     volumes:
       - homarr_data:/appdata
     ports:
