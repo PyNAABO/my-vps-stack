@@ -1,0 +1,12 @@
+services:
+  filebrowser:
+    image: filebrowser/filebrowser
+    container_name: filebrowser
+    user: ${PUID:-1000}:${PGID:-1000}
+    volumes:
+      - /opt/seedbox:/srv
+      - ../../config/fb/filebrowser.db:/database.db
+      - ../../config/fb/settings.json:/config/settings.json
+    ports:
+      - "8081:80"
+    restart: always

@@ -1,0 +1,2 @@
+hostname: drive
+service: http://filebrowser:80

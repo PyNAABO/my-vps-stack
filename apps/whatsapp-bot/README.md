@@ -19,13 +19,12 @@ A simple WhatsApp bot built with [Baileys](https://github.com/WhiskeySockets/Bai
 
 ## Configuration
 
-Set the target group via environment variable in `docker-compose.yml`:
+Set the target group via environment variable. The `ALLOWED_GROUP_ID` is set in GitHub Secrets and injected during deployment.
 
-```yaml
-whatsapp-bot:
-  build: ./whatsapp-bot
-  environment:
-    - ALLOWED_GROUP_ID=YOUR_GROUP_ID@g.us
+To test locally, create a `.env` file in the repository root:
+
+```
+ALLOWED_GROUP_ID=YOUR_GROUP_ID@g.us
 ```
 
 ## Getting Your Group ID

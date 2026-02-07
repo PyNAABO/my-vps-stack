@@ -1,0 +1,10 @@
+services:
+  tunnel:
+    container_name: my-vps-stack-tunnel
+    image: cloudflare/cloudflared
+    restart: always
+    command: tunnel run
+    volumes:
+      - ../../config/tunnel:/etc/cloudflared
+    environment:
+      - NO_AUTOUPDATE=true

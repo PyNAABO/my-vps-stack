@@ -1,0 +1,9 @@
+services:
+  whatsapp-bot:
+    build: .
+    container_name: whatsapp-bot
+    restart: always
+    environment:
+      - ALLOWED_GROUP_ID=${ALLOWED_GROUP_ID}
+    volumes:
+      - ./auth_info_baileys:/usr/src/app/auth_info_baileys

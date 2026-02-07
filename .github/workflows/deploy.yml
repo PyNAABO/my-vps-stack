@@ -16,35 +16,50 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /root/my-vps-stack
+
             # 1. Update Code (force reset to handle local changes)
             git fetch origin main
             git reset --hard origin/main
 
             # 2. Setup Directories & Env
-            mkdir -p config/tunnel
+            mkdir -p config/tunnel config/fb config/qbit
             echo "" > .env
 
-            # 3. Generate Tunnel Config
-            if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_CREDENTIALS }}" ]; then
-              echo "✅ Local Mode: Generating Tunnel Config..."
-              echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
+            # 3. Auto-generate docker-compose.yml from apps/*/docker-compose.yml
+            echo "# Auto-generated - DO NOT EDIT" > docker-compose.yml
+            echo "# Add/remove apps by adding/removing folders in apps/" >> docker-compose.yml
+            echo "" >> docker-compose.yml
+            echo "include:" >> docker-compose.yml
+            for compose_file in apps/*/docker-compose.yml; do
+              if [ -f "$compose_file" ]; then
+                echo "  - $compose_file" >> docker-compose.yml
+                echo "  ✓ Included: $compose_file"
+              fi
+            done
 
-              printf '%s\n' \
-                "tunnel: ${{ secrets.TUNNEL_ID }}" \
-                "credentials-file: /etc/cloudflared/cert.json" \
-                "ingress:" \
-                "  - hostname: docker.${{ secrets.DOMAIN }}" \
-                "    service: http://portainer:9000" \
-                "  - hostname: status.${{ secrets.DOMAIN }}" \
-                "    service: http://uptime-kuma:3001" \
-                "  - hostname: drive.${{ secrets.DOMAIN }}" \
-                "    service: http://filebrowser:80" \
-                "  - hostname: seed.${{ secrets.DOMAIN }}" \
-                "    service: http://qbittorrent:8080" \
-                "  - hostname: n8n.${{ secrets.DOMAIN }}" \
-                "    service: http://n8n:5678" \
-                "  - service: http_status:404" \
-                > config/tunnel/config.yml
+            # 4. Generate Tunnel Config from apps/*/ingress.yml
+            if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_CREDENTIALS }}" ]; then
+              echo "✅ Generating Tunnel Config..."
+              echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
+              
+              # Build tunnel config header
+              echo "tunnel: ${{ secrets.TUNNEL_ID }}" > config/tunnel/config.yml
+              echo "credentials-file: /etc/cloudflared/cert.json" >> config/tunnel/config.yml
+              echo "ingress:" >> config/tunnel/config.yml
+              
+              # Dynamically add ingress rules from each app's ingress.yml
+              for ingress_file in apps/*/ingress.yml; do
+                if [ -f "$ingress_file" ]; then
+                  hostname=$(grep "^hostname:" "$ingress_file" | cut -d' ' -f2)
+                  service=$(grep "^service:" "$ingress_file" | cut -d' ' -f2)
+                  echo "  - hostname: ${hostname}.${{ secrets.DOMAIN }}" >> config/tunnel/config.yml
+                  echo "    service: ${service}" >> config/tunnel/config.yml
+                  echo "  ✓ Added route: ${hostname} -> ${service}"
+                fi
+              done
+              
+              # Add catch-all 404
+              echo "  - service: http_status:404" >> config/tunnel/config.yml
 
               echo "DOMAIN_NAME=${{ secrets.DOMAIN }}" >> .env
             else
@@ -52,41 +67,18 @@ jobs:
               echo "DOMAIN_NAME=localhost" >> .env
             fi
 
-            # 4. Inject WhatsApp Bot Config
+            # 5. Inject WhatsApp Bot Config
             echo "ALLOWED_GROUP_ID=${{ secrets.ALLOWED_GROUP_ID }}" >> .env
 
-            # 5. Generate FileBrowser Settings
-            mkdir -p config/fb
-            cat <<EOF > config/fb/settings.json
-            {
-              "port": 80,
-              "address": "",
-              "database": "/database.db",
-              "root": "/srv"
-            }
-            EOF
+            # 6. Run init scripts for each app (first-time setup)
+            for init_script in apps/*/init.sh; do
+              if [ -f "$init_script" ]; then
+                echo "🔧 Running $(dirname $init_script)/init.sh"
+                bash "$init_script"
+              fi
+            done
 
-            # 6. Initialize FileBrowser DB if missing
-            if [ ! -s config/fb/filebrowser.db ]; then
-              touch config/fb/filebrowser.db
-              chmod 644 config/fb/filebrowser.db
-              docker run --rm -v $(pwd)/config/fb/filebrowser.db:/database.db -v $(pwd)/config/fb/settings.json:/config/settings.json filebrowser/filebrowser config init
-              docker run --rm -v $(pwd)/config/fb/filebrowser.db:/database.db -v $(pwd)/config/fb/settings.json:/config/settings.json filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
-            fi
-
-            # 7. Configure qBittorrent
-            mkdir -p config/qbit/qBittorrent
-            if [ ! -f config/qbit/qBittorrent/qBittorrent.conf ]; then
-              cat <<EOF > config/qbit/qBittorrent/qBittorrent.conf
-            [LegalNotice]
-            Accepted=true
-            [Preferences]
-            WebUI\Address=*
-            WebUI\Port=8080
-            EOF
-            fi
-
-            # 8. Deployment
+            # 7. Deployment
             sysctl -w net.core.rmem_max=2500000 || true
             docker compose up -d --build --remove-orphans
             docker image prune -f

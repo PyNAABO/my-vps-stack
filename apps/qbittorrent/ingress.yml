@@ -1,0 +1,2 @@
+hostname: seed
+service: http://qbittorrent:8080

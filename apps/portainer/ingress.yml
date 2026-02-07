@@ -1,0 +1,2 @@
+hostname: docker
+service: http://portainer:9000

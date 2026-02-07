@@ -1,85 +1,11 @@
-services:
-  portainer:
-    image: portainer/portainer-ce:latest
-    container_name: portainer
-    restart: always
-    security_opt:
-      - no-new-privileges:true
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - portainer_data:/data
-    ports:
-      - "9000:9000"
+# Auto-generated - DO NOT EDIT
+# Add/remove apps by adding/removing folders in apps/
+# This file is regenerated on each deploy from apps/*/docker-compose.yml
 
-  tunnel:
-    container_name: my-vps-stack-tunnel
-    image: cloudflare/cloudflared
-    restart: always
-    command: tunnel run
-    volumes:
-      - ./config/tunnel:/etc/cloudflared
-    environment:
-      - NO_AUTOUPDATE=true
-    depends_on:
-      - filebrowser
-      - qbittorrent
-      - n8n
-
-  uptime-kuma:
-    image: louislam/uptime-kuma:1
-    container_name: uptime-kuma
-    restart: always
-    volumes:
-      - uptime-kuma-data:/app/data
-    ports:
-      - "3001:3001"
-
-  n8n:
-    image: n8nio/n8n:latest
-    restart: always
-    ports: [ "5678:5678" ]
-    volumes:
-      - n8n_data:/home/node/.n8n
-    environment:
-      - N8N_HOST=${DOMAIN_NAME}
-      - TZ=Asia/Kolkata
-
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Asia/Kolkata
-      - WEBUI_PORT=8080
-    volumes:
-      - ./config/qbit:/config
-      - /opt/seedbox:/downloads
-    ports:
-      - "8080:8080"
-      - "6881:6881"
-      - "6881:6881/udp"
-    restart: always
-
-  filebrowser:
-    image: filebrowser/filebrowser
-    user: ${PUID:-1000}:${PGID:-1000} # Run as non-root user (default 1000:1000)
-    volumes:
-      - /opt/seedbox:/srv
-      - ./config/fb/filebrowser.db:/database.db
-      - ./config/fb/settings.json:/config/settings.json
-    ports: [ "8081:80" ]
-    restart: always
-
-  whatsapp-bot:
-    build: ./whatsapp-bot
-    restart: always
-    environment:
-      - ALLOWED_GROUP_ID=${ALLOWED_GROUP_ID}
-    volumes:
-      - ./whatsapp-bot/auth_info_baileys:/usr/src/app/auth_info_baileys
-
-volumes:
-  n8n_data:
-  portainer_data:
-  uptime-kuma-data:
+include:
+  - apps/portainer/docker-compose.yml
+  - apps/uptime-kuma/docker-compose.yml
+  - apps/qbittorrent/docker-compose.yml
+  - apps/filebrowser/docker-compose.yml
+  - apps/cloudflare-tunnel/docker-compose.yml
+  - apps/whatsapp-bot/docker-compose.yml

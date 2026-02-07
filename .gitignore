@@ -6,13 +6,18 @@ node_modules/
 npm-debug.log
 .DS_Store
 
-# Ignore Heavy Data (Don't upload large files to GitHub!)
+# Ignore Generated Config (Keep source files, ignore runtime data)
+config/tunnel/
+config/fb/
+config/qbit/
+
+# Ignore Heavy Data
 downloads/
-config/
-!config/backup_filter.txt
-filebrowser.db
 
 # WhatsApp Credentials (KEEP PRIVATE)
-whatsapp-bot/auth_info_baileys/
-whatsapp-bot/chat_db.json
-whatsapp-bot/store/
+apps/whatsapp-bot/auth_info_baileys/
+apps/whatsapp-bot/chat_db.json
+apps/whatsapp-bot/store/
+
+# Keep backup filter
+!config/backup_filter.txt

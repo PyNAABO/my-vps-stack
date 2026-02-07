@@ -1,0 +1,2 @@
+hostname: status
+service: http://uptime-kuma:3001
