@@ -1,23 +1,21 @@
 ﻿# 📦 Ultimate Seedbox Guide
 
-## The Battle-Tested, Error-Free VPS Setup
+## The Modern, Automated Setup
 
 > [!IMPORTANT]
-> **Save this guide.** This method sets up **qBittorrent** (Downloader) and **FileBrowser** (Manager/Streamer) in under 2 minutes. It includes a "Surgical Method" to avoid common permission pitfalls.
+> This guide sets up **qBittorrent** (Downloader) and **FileBrowser** (Manager/Streamer) using the **GitOps workflow**, ensuring alignment with the rest of your stack.
 
 ### 📋 Prerequisites
 
-- A fresh VPS (Ubuntu/Debian recommended).
 - **Docker** & **Docker Compose** installed.
 - Root access.
+- The `my-vps-stack` repository cloned to `/root/my-vps-stack`.
 
 ---
 
-### Phase 1: The Foundation 🏗️
+### Phase 1: One-Time Setup 🏗️
 
-We manually create the file structure and database first. This is the **"Surgical Method"** to prevent Docker permission errors before they happen.
-
-**Run this entire block in your terminal:**
+We need to create the folders where your files will live. Run this **exact block** in your terminal:
 
 ```bash
 # 1. Create directory structure with proper ownership
@@ -42,98 +40,46 @@ docker run --rm \
   filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
 ```
 
-> [!TIP]
-> You can change `adminadmin1234` in the command above to your preferred password.
-
 > [!CAUTION]
-> **Change the default password immediately after first login!** The credentials shown here are publicly documented and must be updated to secure your seedbox.
+> **Change the default password regarding filebrowser immediately after first login!**
 
 ---
 
-### Phase 2: Deployment (Docker Compose) 🚀
+### Phase 2: Deployment 🚀
 
-We use `docker-compose` for a robust, restart-proof setup.
-
-1. **Create the Compose file:**
+1. **Verify Apps are Active:**
+   Ensure `qbittorrent` and `filebrowser` folders exist in `apps/`. If they are in `apps/.archive/`, move them to `apps/`.
 
    ```bash
-   nano /opt/seedbox/docker-compose.yml
+   mv apps/.archive/qbittorrent apps/ 2>/dev/null
+   mv apps/.archive/filebrowser apps/ 2>/dev/null
    ```
 
-2. **Paste the following configuration:**
-
-   ```yaml
-   services:
-     qbittorrent:
-       image: lscr.io/linuxserver/qbittorrent:latest
-       container_name: qbittorrent
-       environment:
-         - PUID=1000
-         - PGID=1000
-         - TZ=Etc/UTC
-         - WEBUI_PORT=8080
-       volumes:
-         - /opt/seedbox/config:/config
-         - /opt/seedbox/downloads:/downloads
-       ports:
-         - 8080:8080
-         - 6881:6881
-         - 6881:6881/udp
-       restart: unless-stopped
-
-     filebrowser:
-       image: filebrowser/filebrowser
-       container_name: filebrowser
-       volumes:
-         - /opt/seedbox/downloads:/srv # Mapped to match qBittorrent downloads
-         - /opt/seedbox/filebrowser.db:/database.db # Connects to our pre-configured DB
-       ports:
-         - 8081:80
-       restart: unless-stopped
-   ```
-
-3. **Launch the Stack:**
-   ```bash
-   cd /opt/seedbox
-   docker compose up -d
-   ```
+2. **Push to GitHub:**
+   Commit and push your changes. The GitHub Action will automatically:
+   - Generate the master `docker-compose.yml` including these apps.
+   - Configure the Cloudflare Tunnel ingress for `seed.*` and `drive.*` (or whatever is defined in `ingress.yml`).
+   - Deploy the stack.
 
 ---
 
-### Phase 3: Network & Access 🌐
+### Phase 3: Access 🌐
 
-#### 🔓 Open Firewall Ports (UFW)
-
-Ensure these ports are open on your VPS firewall:
-
-```bash
-sudo ufw allow 8080/tcp  # qBittorrent UI
-sudo ufw allow 8081/tcp  # FileBrowser UI
-sudo ufw allow 6881      # Torrent Traffic
-```
-
-#### 🖥️ Dashboard Access
-
-| Service         | URL                     | Default User | Default Password        |
-| :-------------- | :---------------------- | :----------- | :---------------------- |
-| **qBittorrent** | `http://<YOUR_IP>:8080` | `admin`      | _Check Logs (See Note)_ |
-| **FileBrowser** | `http://<YOUR_IP>:8081` | `admin`      | `adminadmin1234`        |
+| Service         | Subdomain | Default User | Default Password        |
+| :-------------- | :-------- | :----------- | :---------------------- |
+| **qBittorrent** | `seed.*`  | `admin`      | _Check Logs (See Note)_ |
+| **FileBrowser** | `drive.*` | `admin`      | `adminadmin1234`        |
 
 > [!NOTE]
-> **qBittorrent Password:** On first launch, qBittorrent generates a random password.
-> Run `docker logs qbittorrent` to find it.
-> Login, then immediately go to **Tools > Options > Web UI** to change it.
+> **qBittorrent Password:** On first launch, check logs:
+> `docker logs qbittorrent`
 
 ---
 
 ### 💡 How It Works
 
-1. **Integration:** Both apps share the `/opt/seedbox/downloads` folder.
-2. **Workflow:**
-   - Add a torrent in **qBittorrent**.
-   - It downloads to `/downloads` (inside container) → `/opt/seedbox/downloads` (on VPS).
-   - **FileBrowser** sees `/srv` (inside container) ← `/opt/seedbox/downloads` (on VPS).
-   - You can instantly stream or download the file via FileBrowser.
-
-> [!WARNING]
-> In qBittorrent settings, **keep the Default Save Path as `/downloads/`**. Do not change it to matched host paths like `/root/Seedbox/...`.
+1. **Shared Storage:** Both apps are "mounted" to the same folder on your VPS (`/opt/seedbox/downloads`).
+2. **The Flow:**
+   - **qBittorrent** downloads a file to `/downloads` (inside the container).
+   - This appears instantly in `/opt/seedbox/downloads` (on your VPS).
+   - **FileBrowser** reads this same folder, allowing you to stream or download the file immediately.

@@ -84,11 +84,13 @@ my-vps-stack/
 
 ## **📋 Prerequisites**
 
-1. **OS:** Ubuntu 22.04 / 24.04 LTS
-2. **Dependencies:** git, curl, docker & docker compose (v2.20+)
-3. **Firewall:** SSH (22) must be open. Other ports are tunneled via Cloudflare.
+1. **OS:** Ubuntu 22.04 LTS or newer.
+2. **Software:** `git`, `curl`, `docker` installed.
+3. **Network:** Open port **22** (SSH). All other traffic is routed securely via Cloudflare Tunnel.
 
-## **⚡ Installation**
+## **⚡ Quick Start**
+
+Run these commands on your VPS as root:
 
 ```bash
 cd /root
@@ -96,6 +98,8 @@ git clone https://github.com/PyNAABO/my-vps-stack.git
 cd my-vps-stack
 docker compose up -d
 ```
+
+_The stack will start within seconds._
 
 ## **🔐 Setup Automation (CI/CD)**
 
@@ -159,11 +163,12 @@ docker compose up -d
 
 ## **🛠️ Utility Scripts**
 
-| Script                    | Description                   |
-| :------------------------ | :---------------------------- |
-| `scripts/run_once.sh`     | Sets up `update` alias        |
-| `scripts/update.sh`       | System update script          |
-| `scripts/cloud_backup.sh` | rclone backup to Google Drive |
+| Script                       | Description                     |
+| :--------------------------- | :------------------------------ |
+| `scripts/run_once.sh`        | Sets up `update` alias          |
+| `scripts/update.sh`          | System update script            |
+| `scripts/cloud_backup.sh`    | rclone backup to Google Drive   |
+| `scripts/list_subdomains.sh` | Lists all configured subdomains |
 
 > 📦 **Seedbox setup?** See [docs/Seedbox.md](docs/Seedbox.md)
 
