@@ -1,0 +1,16 @@
+# --- EXCLUDE JUNK ---
+- node_modules/**
+- .npm/**
+- .cache/**
+- .local/share/Trash/**
+- .pm2/logs/**
+- snap/**
+- **/*.log
+- **/*.zip
+- **/*.part*
+
+# --- EXCLUDE HEAVY MEDIA (Optional - Uncomment if you want to skip movies) ---
+# - Seedbox/downloads/**
+
+# --- INCLUDE EVERYTHING ELSE ---
++ /**
