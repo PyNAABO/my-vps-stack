@@ -35,7 +35,7 @@ my-vps-stack/
 
 | App                   | Subdomain | Description                   | Default Credentials       |
 | :-------------------- | :-------- | :---------------------------- | :------------------------ |
-| **Homarr**            | home.\*   | Dashboard / Homepage          | _(Setup on first launch)_ |
+| **Dashboard**         | home.\*   | Auto-generated app launcher   | _(No setup needed)_       |
 | **Portainer**         | docker.\* | Docker management UI          | _(Setup on first launch)_ |
 | **Uptime Kuma**       | status.\* | Service monitoring            | _(Setup on first launch)_ |
 | **Dozzle**            | logs.\*   | Real-time container logs      | _(No auth needed)_        |

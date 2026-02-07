@@ -1,0 +1,9 @@
+services:
+  dashboard:
+    image: nginx:alpine
+    container_name: dashboard
+    restart: always
+    volumes:
+      - /root/my-vps-stack/config/dashboard:/usr/share/nginx/html:ro
+    ports:
+      - "8090:80"

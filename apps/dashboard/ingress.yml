@@ -1,0 +1,2 @@
+hostname: home
+service: http://dashboard:80
