@@ -16,9 +16,9 @@ We've automated the setup to make it as easy as a VPS.
 
 ### What this script does:
 
-- Installs all native dependencies (Node.js, qBittorrent, etc.).
+- Installs all native dependencies (Node.js, etc.).
 - Sets up **PM2** to manage processes in the background.
-- Starts all your apps in `apps/` automatically.
+- Starts all your apps in `apps/` automatically (including core apps like qBittorrent and Filebrowser, but **only if their folders exist**).
 
 ---
 

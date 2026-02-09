@@ -20,41 +20,53 @@ pkg update -y
 pkg install git nodejs-lts python make clang binutils -y
 
 # B. qBittorrent (Attempt Install)
-if ! command -v qbittorrent-nox &> /dev/null; then
-    echo "   Installing qBittorrent..."
-    # Try installing from main or TUR repo
-    if pkg install qbittorrent-nox -y; then
-        echo "✅ qBittorrent installed."
-    else
-        echo "⚠️  qBittorrent-nox package not found in default/TUR repos."
-        echo "   You may need to install it manually or use proot-distro."
+if [ -d "$BASE_DIR/apps/qbittorrent" ]; then
+    if ! command -v qbittorrent-nox &> /dev/null; then
+        echo "   Installing qBittorrent..."
+        # Try installing from main or TUR repo
+        if pkg install qbittorrent-nox -y; then
+            echo "✅ qBittorrent installed."
+        else
+            echo "⚠️  qBittorrent-nox package not found in default/TUR repos."
+            echo "   You may need to install it manually or use proot-distro."
+        fi
     fi
+else
+    echo "⏭️  Skipping qBittorrent (apps/qbittorrent not found)."
 fi
 
 # C. Filebrowser (Manual Install)
-if ! command -v filebrowser &> /dev/null; then
-    echo "   Installing Filebrowser..."
-    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash -s -- -b "$PREFIX/bin"
+if [ -d "$BASE_DIR/apps/filebrowser" ]; then
+    if ! command -v filebrowser &> /dev/null; then
+        echo "   Installing Filebrowser..."
+        curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash -s -- -b "$PREFIX/bin"
+    fi
+
+    # Initialize FileBrowser DB if missing
+    if [ ! -f "$HOME/.filebrowser.db" ]; then
+        echo "   Initializing FileBrowser database..."
+        # Create DB and add admin user
+        filebrowser config init -d "$HOME/.filebrowser.db" > /dev/null 2>&1
+        filebrowser users add admin adminadmin1234 --perm.admin -d "$HOME/.filebrowser.db" > /dev/null 2>&1
+        echo "✅ FileBrowser initialized with default credentials (admin/adminadmin1234)"
+    fi
+else
+    echo "⏭️  Skipping Filebrowser (apps/filebrowser not found)."
 fi
 
-# Initialize FileBrowser DB if missing
-if [ ! -f "$HOME/.filebrowser.db" ]; then
-    echo "   Initializing FileBrowser database..."
-    # Create DB and add admin user
-    filebrowser config init -d "$HOME/.filebrowser.db" > /dev/null 2>&1
-    filebrowser users add admin adminadmin1234 --perm.admin -d "$HOME/.filebrowser.db" > /dev/null 2>&1
-    echo "✅ FileBrowser initialized with default credentials (admin/adminadmin1234)"
-
-
 # D. Uptime Kuma (Source Install)
-if [ ! -d "$HOME/uptime-kuma" ]; then
-    echo "   Setting up Uptime Kuma (this may take a while)..."
-    git clone https://github.com/louislam/uptime-kuma.git "$HOME/uptime-kuma"
-    cd "$HOME/uptime-kuma" || exit
-    npm run setup
-    cd - || exit
+if [ -d "$BASE_DIR/apps/uptime-kuma" ]; then
+    if [ ! -d "$HOME/uptime-kuma" ]; then
+        echo "   Setting up Uptime Kuma (this may take a while)..."
+        git clone https://github.com/louislam/uptime-kuma.git "$HOME/uptime-kuma"
+        cd "$HOME/uptime-kuma" || exit
+        npm run setup
+        cd - || exit
+    else
+        echo "✅ Uptime Kuma directory found."
+    fi
 else
-    echo "✅ Uptime Kuma directory found."
+    echo "⏭️  Skipping Uptime Kuma (apps/uptime-kuma not found)."
 fi
 
 # E. Global Environment Config (Docker-Compose style)
@@ -98,39 +110,48 @@ fi
 cat <<EOF > ecosystem.config.js
 module.exports = {
   apps: [
-    {
-      name: "torrent",
-      script: "qbittorrent-nox",
-      args: "--webui-port=8082",
-      interpreter: "none", // Binary mode
-      exec_mode: "fork"
-    },
-    {
-      name: "files",
-      script: "filebrowser",
-      args: "-p 8081 -a 0.0.0.0 -r /sdcard/Download -d $HOME/.filebrowser.db",
-      interpreter: "none",
-      exec_mode: "fork"
-    },
-    {
-      name: "uptime",
-      script: "server/server.js",
-      args: "--port=3001",
-      cwd: process.env.HOME + "/uptime-kuma",
-      interpreter: "node",
-      env: {
 $(
-    # Inject global .env variables into Uptime Kuma too (optional but consistant)
-    if [ -f "$ENV_FILE" ]; then
-        while IFS='=' read -r key val; do
-            [[ \$key =~ ^#.* ]] && continue
-            [[ -z \$key ]] && continue
-            echo "        \"\$key\": \"\$val\","
-        done < "$ENV_FILE"
+    if [ -d "$BASE_DIR/apps/qbittorrent" ]; then
+        echo "    {"
+        echo "      name: \"torrent\","
+        echo "      script: \"qbittorrent-nox\","
+        echo "      args: \"--webui-port=8082\","
+        echo "      interpreter: \"none\","
+        echo "      exec_mode: \"fork\""
+        echo "    },"
     fi
 )
-      }
-    },
+$(
+    if [ -d "$BASE_DIR/apps/filebrowser" ]; then
+        echo "    {"
+        echo "      name: \"files\","
+        echo "      script: \"filebrowser\","
+        echo "      args: \"-p 8081 -a 0.0.0.0 -r /sdcard/Download -d $HOME/.filebrowser.db\","
+        echo "      interpreter: \"none\","
+        echo "      exec_mode: \"fork\""
+        echo "    },"
+    fi
+)
+$(
+    if [ -d "$BASE_DIR/apps/uptime-kuma" ]; then
+        echo "    {"
+        echo "      name: \"uptime\","
+        echo "      script: \"server/server.js\","
+        echo "      args: \"--port=3001\","
+        echo "      cwd: process.env.HOME + \"/uptime-kuma\","
+        echo "      interpreter: \"node\","
+        echo "      env: {"
+        if [ -f "$ENV_FILE" ]; then
+            while IFS='=' read -r key val; do
+                [[ \$key =~ ^#.* ]] && continue
+                [[ -z \$key ]] && continue
+                echo "        \"\$key\": \"\$val\","
+            done < "$ENV_FILE"
+        fi
+        echo "      }"
+        echo "    },"
+    fi
+)
     // Auto-detect custom apps in /apps/ folder
 $(
     for app_dir in "$BASE_DIR"/apps/*; do

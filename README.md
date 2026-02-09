@@ -186,7 +186,7 @@ Using Docker on a non-rooted Android device (via QEMU/Proot) is possible but **e
 - ✅ **Zero Overhead:** Apps run directly on your phone's processor.
 - ✅ **Battery Friendly:** Sleep optimization works better.
 - ✅ **Instant Start:** No VM boot times.
-- ⚠️ **Trade-off:** You lose Docker's "run anything" compatibility. Only Node.js and Python apps are auto-detected by `termux-up.sh`.
+- ⚠️ **Trade-off:** You lose Docker's "run anything" compatibility. Only Node.js and Python apps are auto-detected by `termux-up.sh`. Core apps (qBittorrent, etc.) are only installed if their `apps/` folders exist.
 
 > [!TIP]
 > Use the [Termux Startup Script](scripts/termux-up.sh) for a one-command setup on Android.
