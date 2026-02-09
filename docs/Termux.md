@@ -35,6 +35,45 @@ Since we don't use Docker on Android (requires root), we use **PM2** for process
 
 ---
 
+## ➕ Adding Apps (The "Termux Way")
+
+Since we don't use Docker, adding apps is slightly different but still easy.
+
+1.  **Create a folder** in `apps/` (e.g., `apps/myapp`).
+2.  **Add your app code:**
+    - **Node.js:** Add `package.json` (and `index.js`).
+    - **Python:** Add `requirements.txt` (and `main.py` or `bot.py`).
+3.  **Restart the stack:**
+    ```bash
+    pm2 delete all
+    ./scripts/termux-up.sh
+    ```
+4.  **That's it!** The script auto-detects your new app and adds it to PM2.
+
+> [!TIP]
+> You can create a local `.env` file in your app folder (`apps/myapp/.env`) to override global settings.
+
+---
+
+## 🛠️ Utility Scripts
+
+We've adapted the helper scripts to work natively on Termux:
+
+| Script                    | Description                                    |
+| :------------------------ | :--------------------------------------------- |
+| `update` (alias)          | Runs `pkg update && pkg upgrade` safely.       |
+| `scripts/cloud_backup.sh` | Backs up your `apps/` and DBs to Google Drive. |
+| `scripts/run_once.sh`     | Targeted `update` alias creation.              |
+
+To enable the `update` shortcut:
+
+```bash
+./scripts/run_once.sh
+source ~/.bashrc
+```
+
+---
+
 ## 🔋 Battery & Background Performance
 
 Android is aggressive about killing background apps. To keep your server alive:

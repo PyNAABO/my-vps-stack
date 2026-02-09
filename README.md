@@ -190,6 +190,7 @@ Using Docker on a non-rooted Android device (via QEMU/Proot) is possible but **e
 
 > [!TIP]
 > Use the [Termux Startup Script](scripts/termux-up.sh) for a one-command setup on Android.
+> **Note:** `docker-compose` commands **do not work** on Termux. Use `pm2` commands instead.
 
 ## **🛠️ Utility Scripts**
 

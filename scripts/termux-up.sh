@@ -56,14 +56,20 @@ fi
 
 # D. Uptime Kuma (Source Install)
 if [ -d "$BASE_DIR/apps/uptime-kuma" ]; then
+    # Clone if missing
     if [ ! -d "$HOME/uptime-kuma" ]; then
-        echo "   Setting up Uptime Kuma (this may take a while)..."
+        echo "   Cloning Uptime Kuma..."
         git clone https://github.com/louislam/uptime-kuma.git "$HOME/uptime-kuma"
+    else
+        echo "✅ Uptime Kuma directory found."
+    fi
+
+    # Check for node_modules and install if missing
+    if [ ! -d "$HOME/uptime-kuma/node_modules" ]; then
+        echo "   Installing Uptime Kuma dependencies (this may take a while)..."
         cd "$HOME/uptime-kuma" || exit
         npm run setup
         cd - || exit
-    else
-        echo "✅ Uptime Kuma directory found."
     fi
 else
     echo "⏭️  Skipping Uptime Kuma (apps/uptime-kuma not found)."
@@ -100,12 +106,6 @@ done
 
 # 3. Create/Update PM2 Ecosystem Config
 echo "⚙️  Generating PM2 Ecosystem Config..."
-
-# Check for Cloudflared config
-HAS_TUNNEL_CONFIG="false"
-if [ -f "$HOME/.cloudflared/config.yml" ]; then
-    HAS_TUNNEL_CONFIG="true"
-fi
 
 cat <<EOF > ecosystem.config.js
 module.exports = {
@@ -145,6 +145,8 @@ $(
             while IFS='=' read -r key val; do
                 [[ \$key =~ ^#.* ]] && continue
                 [[ -z \$key ]] && continue
+                # Strip carriage return and leading/trailing whitespace
+                val=$(echo "$val" | tr -d '\r')
                 echo "        \"\$key\": \"\$val\","
             done < "$ENV_FILE"
         fi
@@ -177,6 +179,7 @@ $(
                     while IFS='=' read -r key val; do
                         [[ \$key =~ ^#.* ]] && continue
                         [[ -z \$key ]] && continue
+                        val=$(echo "$val" | tr -d '\r')
                         echo "        \"\$key\": \"\$val\","
                     done < "$ENV_FILE"
                 fi
@@ -186,6 +189,7 @@ $(
                    while IFS='=' read -r key val; do
                        [[ \$key =~ ^#.* ]] && continue
                        [[ -z \$key ]] && continue
+                       val=$(echo "$val" | tr -d '\r')
                        echo "        \"\$key\": \"\$val\","
                    done < "$app_dir/.env"
                 fi
@@ -201,10 +205,6 @@ $(
                     py_script="bot.py"
                 fi
 
-                # Install requirements if present (detected during generation, executed during start? No, do it now)
-                # Wait, this is inside a subshell for string generation. We should NOT run commands here.
-                # Only generate config.
-                
                 echo "    {"
                 echo "      name: \"$app_name\","
                 echo "      script: \"$py_script\","
@@ -216,6 +216,7 @@ $(
                     while IFS='=' read -r key val; do
                         [[ \$key =~ ^#.* ]] && continue
                         [[ -z \$key ]] && continue
+                        val=$(echo "$val" | tr -d '\r')
                         echo "        \"\$key\": \"\$val\","
                     done < "$ENV_FILE"
                 fi
@@ -229,13 +230,32 @@ $(
         fi
     done
 )
-    {
-      name: "tunnel",
-      script: "cloudflared",
-      args: "tunnel run",
-      interpreter: "none",
-      enabled: $HAS_TUNNEL_CONFIG
-    }
+$(
+    # Check for tunnel configuration
+    TUNNEL_ARGS="tunnel run"
+    if [ -f "$ENV_FILE" ]; then
+        # Check for TUNNEL_TOKEN/TUNNEL_NAME/CLOUDFLARED_TUNNEL_TOKEN in .env
+        while IFS='=' read -r key val; do
+             key=$(echo "$key" | tr -d '\r')
+             val=$(echo "$val" | tr -d '\r')
+             if [[ "$key" == "TUNNEL_TOKEN" || "$key" == "CLOUDFLARED_TUNNEL_TOKEN" ]]; then
+                 TUNNEL_ARGS="tunnel run --token $val"
+                 break
+             elif [[ "$key" == "TUNNEL_NAME" ]]; then
+                 TUNNEL_ARGS="tunnel run $val"
+                 break
+             fi
+        done < "$ENV_FILE"
+    fi
+
+    echo "    {"
+    echo "      name: \"tunnel\","
+    echo "      script: \"cloudflared\","
+    echo "      args: \"$TUNNEL_ARGS\","
+    echo "      interpreter: \"none\","
+    echo "      exec_mode: \"fork\""
+    echo "    }"
+)
   ]
 };
 EOF
@@ -243,6 +263,10 @@ EOF
 # 4. Start Everything
 echo "🚀 Starting App Stack..."
 echo "ℹ️  Note: If this is the first run, Uptime Kuma might take a moment to start."
+
+# Clear existing PM2 processes to ensure env vars are updated
+echo "🧹 Cleaning up old PM2 processes..."
+pm2 delete all > /dev/null 2>&1 || true
 
 pm2 start ecosystem.config.js
 pm2 save

@@ -1,10 +1,22 @@
 #!/bin/bash
 
 # Configuration
-SOURCE_DIRS=("/root" "/opt/seedbox")
+# Check if running in Termux
+if [ -n "$TERMUX_VERSION" ]; then
+    # Termux Configuration
+    # Assumes script is in .../scripts/, so project root is .../
+    PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+    # Backup the apps directory, the .env file, and the filebrowser database
+    SOURCE_DIRS=("$PROJECT_ROOT/apps" "$PROJECT_ROOT/.env" "$HOME/.filebrowser.db")
+    LOG_FILE="$PROJECT_ROOT/backup.log"
+else
+    # VPS Configuration
+    SOURCE_DIRS=("/root" "/opt/seedbox")
+    LOG_FILE="/var/log/rclone_backup.log"
+fi
+
 DEST_REMOTE="gdrive:VPS_Backup"
 FILTER_FILE="$(dirname "$0")/../config/backup_filter.txt"
-LOG_FILE="/var/log/rclone_backup.log"
 
 # Strict error handling with trap
 set -e
