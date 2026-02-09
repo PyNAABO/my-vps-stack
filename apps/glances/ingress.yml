@@ -1,0 +1,2 @@
+hostname: monitor
+service: http://glances:61208

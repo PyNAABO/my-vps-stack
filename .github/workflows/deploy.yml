@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.2.0
         env:
           TUNNEL_CREDENTIALS: ${{ secrets.TUNNEL_CREDENTIALS }}
         with:

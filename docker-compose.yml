@@ -9,3 +9,5 @@ include:
   - apps/filebrowser/docker-compose.yml
   - apps/cloudflare-tunnel/docker-compose.yml
   - apps/whatsapp-bot/docker-compose.yml
+  - apps/glances/docker-compose.yml
+  - apps/watchtower/docker-compose.yml

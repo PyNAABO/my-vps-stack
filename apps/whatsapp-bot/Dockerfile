@@ -9,7 +9,10 @@ COPY package*.json ./
 RUN npm install
 
 # Copy the rest of your bot code
-COPY . .
+COPY --chown=node:node . .
+
+# Run as non-root user
+USER node
 
 # Start the bot
 CMD ["node", "index.js"]
