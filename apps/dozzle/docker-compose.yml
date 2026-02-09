@@ -7,3 +7,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     ports:
       - "9999:8080"
+    environment:
+      DOZZLE_AUTH_USERNAME: admin
+      DOZZLE_AUTH_PASSWORD: adminadmin1234

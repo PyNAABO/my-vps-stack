@@ -10,7 +10,10 @@ jobs:
     steps:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@master
+        env:
+          TUNNEL_CREDENTIALS: ${{ secrets.TUNNEL_CREDENTIALS }}
         with:
+          envs: TUNNEL_CREDENTIALS
           host: ${{ secrets.VPS_IP }}
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
@@ -40,7 +43,7 @@ jobs:
             # 4. Generate Tunnel Config from apps/*/ingress.yml
             if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_CREDENTIALS }}" ]; then
               echo "✅ Generating Tunnel Config..."
-              echo '${{ secrets.TUNNEL_CREDENTIALS }}' > config/tunnel/cert.json
+              echo "$TUNNEL_CREDENTIALS" > config/tunnel/cert.json
               
               # Build tunnel config header
               echo "tunnel: ${{ secrets.TUNNEL_ID }}" > config/tunnel/config.yml
@@ -48,20 +51,16 @@ jobs:
               echo "ingress:" >> config/tunnel/config.yml
               
               # Dynamically add ingress rules from each app's ingress.yml
-              # Install yq once if not present (with fallback to grep)
+
+              # Install yq pinned version
               if ! command -v yq &>/dev/null; then
-                wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 && chmod +x /usr/bin/yq || echo "⚠️ yq install failed, using grep fallback"
+                wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 && chmod +x /usr/bin/yq
               fi
               
               for ingress_file in apps/*/ingress.yml; do
                 if [ -f "$ingress_file" ]; then
-                  if command -v yq &>/dev/null; then
                     hostname=$(yq '.hostname' "$ingress_file")
                     service=$(yq '.service' "$ingress_file")
-                  else
-                    hostname=$(grep "^hostname:" "$ingress_file" | awk '{print $2}')
-                    service=$(grep "^service:" "$ingress_file" | awk '{print $2}')
-                  fi
                   echo "  - hostname: ${hostname}.${{ secrets.DOMAIN }}" >> config/tunnel/config.yml
                   echo "    service: ${service}" >> config/tunnel/config.yml
                   echo "  ✓ Added route: ${hostname} -> ${service}"
@@ -97,6 +96,6 @@ jobs:
 
             # 8. Deployment
             sysctl -w net.core.rmem_max=2500000 || true
-            docker compose up -d --build --remove-orphans
+            docker compose up -d --build --remove-orphans --wait
             docker image prune -f
             echo "✅ Deployment Completed!"

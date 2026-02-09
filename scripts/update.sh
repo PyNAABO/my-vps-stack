@@ -14,6 +14,12 @@ fi
 
 echo -e "${YELLOW}🚀 Starting System Update...${NC}"
 
+# Stop on error
+set -e
+
+# Error trap
+trap 'echo -e "${RED}❌ Error occurred at line $LINENO. Update aborted.${NC}"; exit 1' ERR
+
 # 1. Update the list of available packages
 echo -e "${GREEN}[1/4] Updating package lists...${NC}"
 apt update

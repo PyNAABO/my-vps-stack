@@ -39,8 +39,11 @@ for ingress_file in apps/*/ingress.yml; do
     hostname=$(grep "^hostname:" "$ingress_file" | awk '{print $2}')
   fi
   
+  # Sanitize inputs for HTML (XSS prevention)
+  hostname=$(echo "$hostname" | sed 's/[<>&"'"'"']//g')
+  
   icon=$(get_icon "$app_name")
-  display_name=$(echo "$app_name" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+  display_name=$(echo "$app_name" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g' | sed 's/[<>&"'"'"']//g')
   
   cat >> "$TILES_FILE" << TILE
     <a href="https://${hostname}.${DOMAIN}" class="tile" target="_blank">

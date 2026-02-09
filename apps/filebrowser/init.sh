@@ -26,4 +26,5 @@ if [ ! -s config/fb/filebrowser.db ]; then
     -v $(pwd)/config/fb/settings.json:/config/settings.json \
     filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
   echo "✅ FileBrowser DB initialized with admin user"
+  echo "⚠️  WARNING: Default credentials are 'admin' / 'adminadmin1234'. Change them immediately!"
 fi

@@ -38,15 +38,22 @@ my-vps-stack/
 | **Dashboard**         | home.\*   | Auto-generated app launcher   | _(No setup needed)_       |
 | **Portainer**         | docker.\* | Docker management UI          | _(Setup on first launch)_ |
 | **Uptime Kuma**       | status.\* | Service monitoring            | _(Setup on first launch)_ |
-| **Dozzle**            | logs.\*   | Real-time container logs      | _(No auth needed)_        |
+| **Dozzle**            | logs.\*   | Real-time container logs      | admin / adminadmin1234    |
 | **FileBrowser**       | drive.\*  | File manager / Streamer       | _(See init.sh)_           |
 | **qBittorrent**       | seed.\*   | Torrent client                | _(Check docker logs)_     |
-| **Telegram Bot**      | -         | VPS commands via Telegram     | _(Token in secrets)_      |
+| **Telegram Bot**      | -         | Basic Node Status (Ping/Time) | _(Token in secrets)_      |
 | **WhatsApp Bot**      | -         | Group commands via WhatsApp   | _(Scan QR once)_          |
 | **Cloudflare Tunnel** | -         | Exposes all services securely | _(Auto-configured)_       |
 
 > [!TIP]
-> Apps in `apps/.archive/` are excluded from builds. Move folders out of `.archive/` to re-enable them.
+> **Archived Apps:** The following apps are in `apps/.archive/` and excluded from builds:
+>
+> - `n8n` - Workflow automation
+> - `homarr` - Dashboard alternative
+> - `it-tools` - Developer utilities
+> - `changedetection` - Website change monitoring
+>
+> Move folders out of `.archive/` to re-enable them.
 
 > [!CAUTION]
 > **Change default passwords immediately after first login!**
