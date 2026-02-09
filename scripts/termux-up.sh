@@ -34,55 +34,65 @@ if ! command -v pm2 &> /dev/null; then
     npm install -g pm2
 fi
 
-# 3. App Setup & Start
-BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+# 3. Create/Update PM2 Ecosystem Config
+echo "⚙️  Generating PM2 Ecosystem Config..."
 
-# --- A. qBittorrent ---
-echo "📥 Starting qBittorrent..."
-pm2 start qbittorrent-nox --name torrent -- --webui-port=8082 --daemon=false
-
-# --- B. File Browser ---
-echo "📂 Starting File Browser..."
-# Note: Root is set to phone's Download folder
-pm2 start filebrowser --name files -- -p 8081 -a 0.0.0.0 -r /sdcard/Download
-
-# --- C. Uptime Kuma ---
-if [ ! -d "$HOME/uptime-kuma" ]; then
-    echo "📈 Downloading Uptime Kuma..."
-    git clone https://github.com/louislam/uptime-kuma.git ~/uptime-kuma
-    cd ~/uptime-kuma
-    
-    echo "🔨 Building Uptime Kuma (This may take a while)..."
-    # Fix for Termux/Android builds
-    export CXX=clang++
-    export CC=clang
-    export PYTHON=python3
-    npm run setup
-    
-    cd "$BASE_DIR"
-fi
-echo "📈 Starting Uptime Kuma..."
-pm2 start "node server/server.js --port=3001" --name uptime --cwd ~/uptime-kuma
-
-# --- D. Custom Apps (WhatsApp Bot, etc.) ---
-for app_dir in "$BASE_DIR"/apps/*; do
-    if [ -d "$app_dir" ] && [ -f "$app_dir/package.json" ]; then
-        app_name=$(basename "$app_dir")
-        if [[ "$app_name" != "uptime-kuma" ]]; then # Handled above
-            echo "🤖 Starting $app_name..."
-            (cd "$app_dir" && npm install)
-            pm2 start "$app_dir/index.js" --name "$app_name" --cwd "$app_dir"
+cat <<EOF > ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: "torrent",
+      script: "qbittorrent-nox",
+      args: "--webui-port=8082",
+      interpreter: "none", // Binary mode
+      exec_mode: "fork"
+    },
+    {
+      name: "files",
+      script: "filebrowser",
+      args: "-p 8081 -a 0.0.0.0 -r /sdcard/Download",
+      interpreter: "none",
+      exec_mode: "fork"
+    },
+    {
+      name: "uptime",
+      script: "server/server.js",
+      args: "--port=3001",
+      cwd: process.env.HOME + "/uptime-kuma",
+      interpreter: "node"
+    },
+    // Auto-detect custom apps in /apps/ folder
+$(
+    BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+    for app_dir in "$BASE_DIR"/apps/*; do
+        if [ -d "$app_dir" ] && [ -f "$app_dir/package.json" ]; then
+            app_name=$(basename "$app_dir")
+            if [[ "$app_name" != "uptime-kuma" ]]; then
+                echo "    {"
+                echo "      name: \"$app_name\","
+                echo "      script: \"index.js\","
+                echo "      cwd: \"$app_dir\","
+                echo "      interpreter: \"node\""
+                echo "    },"
+            fi
         fi
-    fi
-done
+    done
+)
+    {
+      name: "tunnel",
+      script: "cloudflared",
+      args: "tunnel run",
+      interpreter: "none",
+      enabled: $(if [ -f "$HOME/.cloudflared/config.yml" ]; then echo "true"; else echo "false"; fi)
+    }
+  ]
+};
+EOF
 
-# --- E. Cloudflare Tunnel ---
-if [ -f "$HOME/.cloudflared/config.yml" ]; then
-    echo "☁️  Starting Cloudflare Tunnel..."
-    pm2 start "cloudflared tunnel run" --name tunnel
-else
-    echo "⚠️  Cloudflare Tunnel not configured. Run 'cloudflared tunnel login' first."
-fi
+# 4. Start Everything
+echo "🚀 Starting App Stack..."
+pm2 start ecosystem.config.js
+pm2 save
 
 # 4. Finalize
 pm2 save
