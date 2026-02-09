@@ -12,31 +12,24 @@ TILES_FILE="/tmp/dashboard_tiles.html"
 
 mkdir -p "$OUTPUT_DIR"
 
-# Load icons from config file (if exists) + hardcoded defaults
+# Load icon from config file
 get_icon() {
   local app_name="$1"
   local icon=""
   
-  # First check config file (user can override)
+  # Read from config file
   if [ -f "$ICON_CONF" ]; then
     icon=$(grep "^${app_name}=" "$ICON_CONF" | cut -d'=' -f2)
   fi
   
-  # If not found in config, use defaults
+  # Fallback to default if not found
   if [ -z "$icon" ]; then
-    case "$app_name" in
-      portainer) echo "🐳" ;;
-      filebrowser) echo "📁" ;;
-      qbittorrent) echo "⬇️" ;;
-      uptime-kuma) echo "📊" ;;
-      telegram-bot) echo "🤖" ;;
-      whatsapp-bot) echo "💬" ;;
-      glances) echo "🖥️" ;;
-      *) echo "🔗" ;;
-    esac
-  else
-    echo "$icon"
+    icon=$(grep "^__default__=" "$ICON_CONF" | cut -d'=' -f2)
+    # Ultimate fallback if config is broken
+    [ -z "$icon" ] && icon="🔗"
   fi
+  
+  echo "$icon"
 }
 
 # Build tiles HTML to temp file
