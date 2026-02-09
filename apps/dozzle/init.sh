@@ -7,7 +7,7 @@ if [ ! -s config/dozzle/users.yml ] || ! grep -q "admin" config/dozzle/users.yml
   echo "🔑 Generating Dozzle users.yml..."
   cat <<EOF > config/dozzle/users.yml
 users:
-  - username: admin
+  admin:
     password: \$2b\$10\$ySjC8IQdII482vNmny9QZeNcJBQe/xJeqAZYFk/gcz3fe2cyrRlAG
     name: Admin User
     email: admin@example.com
