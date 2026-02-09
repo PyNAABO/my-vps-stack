@@ -40,6 +40,12 @@ jobs:
             echo "include:" >> docker-compose.yml
             for compose_file in apps/*/docker-compose.yml; do
               if [ -f "$compose_file" ]; then
+                app_name=$(basename "$(dirname "$compose_file")")
+                # Skip template folder (not a real app)
+                if [ "$app_name" = "_template" ]; then
+                  echo "  ⏭️  Skipped: $compose_file (template)"
+                  continue
+                fi
                 echo "  - $compose_file" >> docker-compose.yml
                 echo "  ✓ Included: $compose_file"
               fi
@@ -64,8 +70,14 @@ jobs:
               
               for ingress_file in apps/*/ingress.yml; do
                 if [ -f "$ingress_file" ]; then
-                    hostname=$(yq '.hostname' "$ingress_file")
-                    service=$(yq '.service' "$ingress_file")
+                  app_name=$(basename "$(dirname "$ingress_file")")
+                  # Skip template folder (not a real app)
+                  if [ "$app_name" = "_template" ]; then
+                    echo "  ⏭️  Skipped ingress: $ingress_file (template)"
+                    continue
+                  fi
+                  hostname=$(yq '.hostname' "$ingress_file")
+                  service=$(yq '.service' "$ingress_file")
                   echo "  - hostname: ${hostname}.${{ secrets.DOMAIN }}" >> config/tunnel/config.yml
                   echo "    service: ${service}" >> config/tunnel/config.yml
                   echo "  ✓ Added route: ${hostname} -> ${service}"
@@ -94,7 +106,13 @@ jobs:
             # 7. Run init scripts for each app (first-time setup)
             for init_script in apps/*/init.sh; do
               if [ -f "$init_script" ]; then
-                echo "🔧 Running $(dirname $init_script)/init.sh"
+                app_name=$(basename "$(dirname "$init_script")")
+                # Skip template folder (not a real app)
+                if [ "$app_name" = "_template" ]; then
+                  echo "  ⏭️  Skipped: $init_script (template)"
+                  continue
+                fi
+                echo "🔧 Running $init_script"
                 bash "$init_script"
               fi
             done

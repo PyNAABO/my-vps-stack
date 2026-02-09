@@ -39,6 +39,7 @@ for ingress_file in apps/*/ingress.yml; do
   
   app_name=$(basename "$(dirname "$ingress_file")")
   [ "$app_name" = "dashboard" ] && continue
+  [ "$app_name" = "_template" ] && continue
   
   if command -v yq &>/dev/null; then
     hostname=$(yq '.hostname' "$ingress_file")
