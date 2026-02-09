@@ -167,6 +167,19 @@ git pull
 docker compose up -d
 ```
 
+## **📱 Local & Android Setup**
+
+Don't have a VPS? You can run this stack locally or on your phone!
+
+| Platform              | Recommended Method  | Guide                                |
+| :-------------------- | :------------------ | :----------------------------------- |
+| **Android (Termux)**  | Native (Super Fast) | [Termux Guide](docs/Termux.md)       |
+| **Windows/Mac/Linux** | Docker Desktop      | `docker compose up -d`               |
+| **Android (Rooted)**  | Native Docker       | [Docker-VM Guide](docs/Docker-VM.md) |
+
+> [!TIP]
+> Use the [Termux Startup Script](scripts/termux-up.sh) for a one-command setup on Android.
+
 ## **🛠️ Utility Scripts**
 
 | Script                       | Description                     |
