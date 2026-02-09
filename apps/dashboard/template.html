@@ -25,11 +25,11 @@
         --text-muted: rgba(255, 255, 255, 0.5);
         --accent: #8b5cf6;
         --accent-glow: rgba(139, 92, 246, 0.4);
-        --header-height: 80px;
-        --footer-height: 40px;
-        --gap: clamp(8px, 1.5vmin, 20px);
+        --footer-height: 30px;
+        --gap: clamp(6px, 1vmin, 16px);
         --transition-duration: 400ms;
-        --tile-size: 200px;
+        --tile-width: 200px;
+        --tile-height: 200px;
         --grid-cols: 4;
         --grid-rows: 3;
       }
@@ -79,26 +79,6 @@
         }
       }
 
-      header {
-        height: var(--header-height);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        position: relative;
-        z-index: 10;
-      }
-
-      h1 {
-        font-size: clamp(1.25rem, 3vmin, 2rem);
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -0.02em;
-      }
-
       main {
         flex: 1;
         display: flex;
@@ -111,15 +91,15 @@
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(var(--grid-cols), var(--tile-size));
-        grid-template-rows: repeat(var(--grid-rows), var(--tile-size));
+        grid-template-columns: repeat(var(--grid-cols), var(--tile-width));
+        grid-template-rows: repeat(var(--grid-rows), var(--tile-height));
         gap: var(--gap);
         transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .tile {
-        width: var(--tile-size);
-        height: var(--tile-size);
+        width: var(--tile-width);
+        height: var(--tile-height);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -156,7 +136,7 @@
       }
 
       .tile:hover {
-        transform: scale(1.05);
+        transform: scale(1.03);
         background: var(--tile-hover-bg);
         border-color: var(--accent);
         box-shadow:
@@ -170,7 +150,7 @@
       }
 
       .tile:active {
-        transform: scale(0.95);
+        transform: scale(0.98);
       }
 
       @keyframes tileEnter {
@@ -181,7 +161,7 @@
       }
 
       .tile-icon {
-        font-size: calc(var(--tile-size) * 0.45);
+        font-size: min(calc(var(--tile-width) * 0.4), calc(var(--tile-height) * 0.4));
         line-height: 1;
         filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         transition: transform 200ms ease;
@@ -192,7 +172,7 @@
       }
 
       .tile-name {
-        font-size: calc(var(--tile-size) * 0.12);
+        font-size: min(calc(var(--tile-width) * 0.1), calc(var(--tile-height) * 0.12));
         font-weight: 600;
         text-align: center;
         opacity: 0.9;
@@ -233,10 +213,6 @@
     </style>
   </head>
   <body>
-    <header>
-      <h1>Dashboard</h1>
-    </header>
-
     <main>
       <div class="grid" id="grid">
         <!-- TILES -->
@@ -252,7 +228,7 @@
         const tiles = grid.querySelectorAll('.tile');
         const itemCount = tiles.length;
 
-        // Calculate optimal grid layout
+        // Calculate optimal grid layout with flexible tile dimensions
         function calculateGrid() {
           if (itemCount === 0) {
             grid.innerHTML = `
@@ -264,48 +240,40 @@
             return;
           }
 
-          const headerHeight = parseInt(getComputedStyle(root).getPropertyValue('--header-height'));
           const footerHeight = parseInt(getComputedStyle(root).getPropertyValue('--footer-height'));
-          const gap = parseInt(getComputedStyle(root).getPropertyValue('--gap')) || 16;
+          const gap = parseInt(getComputedStyle(root).getPropertyValue('--gap')) || 12;
           
           const availableWidth = window.innerWidth - (gap * 2);
-          const availableHeight = window.innerHeight - headerHeight - footerHeight - (gap * 2);
-          
-          // Calculate optimal grid dimensions
-          const viewportRatio = availableWidth / availableHeight;
+          const availableHeight = window.innerHeight - footerHeight - (gap * 2);
           
           let bestCols = 1;
           let bestRows = itemCount;
-          let bestTileSize = 0;
+          let bestTileWidth = 0;
+          let bestTileHeight = 0;
+          let bestArea = 0;
           
-          // Try all possible configurations to maximize tile size
+          // Try all possible configurations to maximize tile area
           for (let cols = 1; cols <= itemCount; cols++) {
             const rows = Math.ceil(itemCount / cols);
             
-            // Calculate tile size for this configuration
+            // Calculate tile dimensions for this configuration
             const tileWidth = (availableWidth - (cols - 1) * gap) / cols;
             const tileHeight = (availableHeight - (rows - 1) * gap) / rows;
-            const tileSize = Math.min(tileWidth, tileHeight);
+            const area = tileWidth * tileHeight;
             
-            // Check if this configuration is better
-            // We prioritize larger tile sizes
-            if (tileSize > bestTileSize) {
-              bestTileSize = tileSize;
+            // Check if this configuration has better area
+            if (area > bestArea) {
+              bestArea = area;
               bestCols = cols;
               bestRows = rows;
-            } else if (tileSize === bestTileSize) {
-              // If tile sizes are equal, prefer more square-ish layouts
-              const currentSquareness = Math.abs(cols - rows);
-              const bestSquareness = Math.abs(bestCols - bestRows);
-              if (currentSquareness < bestSquareness) {
-                bestCols = cols;
-                bestRows = rows;
-              }
+              bestTileWidth = tileWidth;
+              bestTileHeight = tileHeight;
             }
           }
           
           // Update CSS custom properties
-          root.style.setProperty('--tile-size', `${bestTileSize}px`);
+          root.style.setProperty('--tile-width', `${bestTileWidth}px`);
+          root.style.setProperty('--tile-height', `${bestTileHeight}px`);
           root.style.setProperty('--grid-cols', bestCols);
           root.style.setProperty('--grid-rows', bestRows);
           
