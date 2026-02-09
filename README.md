@@ -177,6 +177,17 @@ Don't have a VPS? You can run this stack locally or on your phone!
 | **Windows/Mac/Linux** | Docker Desktop      | `docker compose up -d`               |
 | **Android (Rooted)**  | Native Docker       | [Docker-VM Guide](docs/Docker-VM.md) |
 
+### **Why Native Termux over Docker?**
+
+Using Docker on a non-rooted Android device (via QEMU/Proot) is possible but **extremely resource-heavy**. It emulates hardware, drains battery, and is 5-10x slower.
+
+**This stack uses a "Native" approach:**
+
+- ✅ **Zero Overhead:** Apps run directly on your phone's processor.
+- ✅ **Battery Friendly:** Sleep optimization works better.
+- ✅ **Instant Start:** No VM boot times.
+- ⚠️ **Trade-off:** You lose Docker's "run anything" compatibility. Only Node.js and Python apps are auto-detected by `termux-up.sh`.
+
 > [!TIP]
 > Use the [Termux Startup Script](scripts/termux-up.sh) for a one-command setup on Android.
 
