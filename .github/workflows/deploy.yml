@@ -18,6 +18,11 @@ jobs:
           username: root
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            # 0. Cold Start (Auto-clone if missing)
+            if [ ! -d "/root/my-vps-stack" ]; then
+              echo "🚀 Cold Start: Cloning repository..."
+              git clone https://github.com/${{ github.repository }}.git /root/my-vps-stack
+            fi
             cd /root/my-vps-stack
 
             # 1. Update Code (force reset to handle local changes)

@@ -47,6 +47,11 @@ Send any message to a group while this is running, and the group ID will be prin
 | `.dockerignore`      | Excludes unnecessary files from build     |
 | `auth_info_baileys/` | Session data (auto-generated, gitignored) |
 
+## Initialization
+
+> [!NOTE]
+> This app includes an `init.sh` script that automatically sets correct permissions (`1000:1000`) for the `auth_info_baileys/` directory during deployment.
+
 ## First-Time Setup
 
 1. Deploy the stack: `docker compose up -d`

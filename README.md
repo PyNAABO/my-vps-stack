@@ -98,7 +98,7 @@ my-vps-stack/
 
 ## **⚡ Quick Start**
 
-Run these commands on your VPS as root:
+Run these commands on your VPS as root (Manual Method):
 
 ```bash
 cd /root
@@ -107,11 +107,34 @@ cd my-vps-stack
 docker compose up -d
 ```
 
+> [!TIP]
+> **Better Way:** checks the "Setup Automation" section below for the **Zero-Config** setup!
+
 _The stack will start within seconds._
 
-## **🔐 Setup Automation (CI/CD)**
+## **🚀 Setup Automation (CI/CD)**
 
-### **1. Generate a Deploy Key**
+### **Option A: Cold Start (Brand New VPS)**
+
+**You do NOT need to clone the repo manually!**
+
+1. **Install Docker** on your VPS.
+2. **Add Secrets** to GitHub (Settings → Secrets and variables → Actions):
+   - `VPS_IP`: Your VPS IP
+   - `VPS_SSH_KEY`: Root SSH private key
+   - `DOMAIN`: Your domain
+   - `TUNNEL_ID`: Cloudflare Tunnel ID
+   - `TUNNEL_CREDENTIALS`: Cloudflare Tunnel JSON
+   - `TG_BOT_TOKEN`, `ALLOWED_GROUP_ID`: Bot secrets
+3. **Push to Main**: The deploy workflow will automatically:
+   - SSH into your VPS
+   - **Clone the repository** (if missing)
+   - Setup directories & permissions
+   - Deploy the stack
+
+### **Option B: Manual Setup (Existing VPS)**
+
+1. **Generate a Deploy Key**
 
 ```bash
 ssh-keygen -t ed25519 -f ~/.ssh/github_action -N ""
@@ -119,7 +142,7 @@ cat ~/.ssh/github_action.pub >> ~/.ssh/authorized_keys
 cat ~/.ssh/github_action   # Copy this as VPS_SSH_KEY
 ```
 
-### **2. Configure Cloudflare Tunnel**
+2. **Configure Cloudflare Tunnel**
 
 ```bash
 cloudflared tunnel login
@@ -128,17 +151,7 @@ cloudflared tunnel create vps-cli-tunnel
 
 Create a wildcard CNAME: `*` → `<UUID>.cfargotunnel.com`
 
-### **3. GitHub Secrets**
-
-| Secret                 | Description                          |
-| :--------------------- | :----------------------------------- |
-| **VPS_IP**             | Your VPS IP address                  |
-| **VPS_SSH_KEY**        | Private key from step 1              |
-| **DOMAIN**             | Your domain (e.g., example.com)      |
-| **TUNNEL_ID**          | UUID from cloudflared                |
-| **TUNNEL_CREDENTIALS** | JSON content from ~/.cloudflared/    |
-| **TG_BOT_TOKEN**       | Telegram bot token from @BotFather   |
-| **ALLOWED_GROUP_ID**   | WhatsApp Group ID (format: xxx@g.us) |
+3. **Add GitHub Secrets** (Same as Option A)
 
 ## **🚀 Usage**
 

@@ -10,6 +10,11 @@ A process for automating Docker container base image updates. Watchtower will pu
 - **Schedule:** Checks for updates daily at 4:00 AM.
 - **Cleanup:** Automatically removes old images after update.
 
+## ⚙️ Configuration
+
+> [!IMPORTANT]
+> This service uses `DOCKER_API_VERSION=1.45` to ensure compatibility with newer Docker daemons on the host.
+
 ## 💾 Volumes
 
 - `/var/run/docker.sock`: Required to interact with the Docker daemon.

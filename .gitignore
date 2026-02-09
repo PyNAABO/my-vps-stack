@@ -13,7 +13,7 @@ config/qbit/
 config/dozzle/
 
 # Ignore Local Logs
-.dev_log.md
+dev_log.md
 
 # Ignore Heavy Data
 downloads/
