@@ -12,6 +12,9 @@ config/fb/
 config/qbit/
 config/dozzle/
 
+# Ignore Local Logs
+.dev_log.md
+
 # Ignore Heavy Data
 downloads/
 
