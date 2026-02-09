@@ -1,2 +1,2 @@
-hostname: home
+hostname: panel
 service: http://homarr:7575
