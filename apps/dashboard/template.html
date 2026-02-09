@@ -16,30 +16,41 @@
       }
 
       :root {
-        --bg: #0f0f0f;
-        --tile-bg: linear-gradient(145deg, #1a1a1a, #141414);
-        --tile-border: #2a2a2a;
-        --text: #fff;
-        --text-muted: #666;
-        --accent: #7c3aed;
-        --accent-glow: rgba(124, 58, 237, 0.3);
+        --bg: #0a0a0f;
+        --tile-bg: rgba(255, 255, 255, 0.03);
+        --tile-border: rgba(255, 255, 255, 0.08);
+        --tile-hover-bg: rgba(255, 255, 255, 0.08);
+        --text: #ffffff;
+        --text-muted: rgba(255, 255, 255, 0.5);
+        --accent: #8b5cf6;
+        --accent-glow: rgba(139, 92, 246, 0.4);
+        --header-height: 80px;
+        --footer-height: 40px;
+        --gap: clamp(8px, 1.5vmin, 20px);
+        --transition-duration: 400ms;
+        --tile-size: 200px;
+        --grid-cols: 4;
+        --grid-rows: 3;
       }
 
       @media (prefers-color-scheme: light) {
         :root {
-          --bg: #f5f5f5;
-          --tile-bg: linear-gradient(145deg, #fff, #f0f0f0);
-          --tile-border: #e0e0e0;
-          --text: #1a1a1a;
-          --text-muted: #888;
+          --bg: #f8f9fa;
+          --tile-bg: rgba(255, 255, 255, 0.6);
+          --tile-border: rgba(0, 0, 0, 0.08);
+          --tile-hover-bg: rgba(255, 255, 255, 0.9);
+          --text: #1a1a2e;
+          --text-muted: rgba(26, 26, 46, 0.5);
           --accent: #7c3aed;
-          --accent-glow: rgba(124, 58, 237, 0.2);
+          --accent-glow: rgba(124, 58, 237, 0.3);
         }
       }
 
       html,
       body {
         height: 100%;
+        width: 100%;
+        overflow: hidden;
         font-family:
           "Inter",
           -apple-system,
@@ -50,102 +61,173 @@
       }
 
       body {
-        display: grid;
-        grid-template-rows: auto 1fr auto;
-        min-height: 100vh;
-        padding: 2rem;
-        gap: 2rem;
+        display: flex;
+        flex-direction: column;
+        background: 
+          radial-gradient(ellipse at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+          radial-gradient(ellipse at 100% 100%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+          var(--bg);
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background: 
+            radial-gradient(ellipse at 0% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+            radial-gradient(ellipse at 100% 100%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+            var(--bg);
+        }
       }
 
       header {
-        text-align: center;
+        height: var(--header-height);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 10;
       }
 
       h1 {
-        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        font-size: clamp(1.25rem, 3vmin, 2rem);
         font-weight: 700;
         background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        letter-spacing: -0.02em;
+      }
+
+      main {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--gap);
+        position: relative;
+        overflow: hidden;
       }
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        align-content: center;
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
+        grid-template-columns: repeat(var(--grid-cols), var(--tile-size));
+        grid-template-rows: repeat(var(--grid-rows), var(--tile-size));
+        gap: var(--gap);
+        transition: all var(--transition-duration) cubic-bezier(0.4, 0, 0.2, 1);
       }
 
       .tile {
-        aspect-ratio: 1;
+        width: var(--tile-size);
+        height: var(--tile-size);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 1rem;
+        gap: clamp(4px, 1vmin, 12px);
         background: var(--tile-bg);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
         border: 1px solid var(--tile-border);
-        border-radius: 20px;
+        border-radius: clamp(8px, 2vmin, 20px);
         text-decoration: none;
         color: var(--text);
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        transform: scale(0.8);
+        animation: tileEnter 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .tile::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 50%,
+          rgba(255, 255, 255, 0.05) 100%
+        );
+        opacity: 0;
+        transition: opacity 200ms ease;
       }
 
       .tile:hover {
-        transform: scale(1.03);
+        transform: scale(1.05);
+        background: var(--tile-hover-bg);
         border-color: var(--accent);
         box-shadow:
           0 0 0 1px var(--accent),
           0 20px 40px -10px var(--accent-glow),
-          0 4px 12px rgba(0, 0, 0, 0.15);
+          0 8px 24px rgba(0, 0, 0, 0.2);
+      }
+
+      .tile:hover::before {
+        opacity: 1;
       }
 
       .tile:active {
-        transform: scale(0.98);
+        transform: scale(0.95);
+      }
+
+      @keyframes tileEnter {
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
 
       .tile-icon {
-        font-size: clamp(3rem, 8vw, 4.5rem);
+        font-size: calc(var(--tile-size) * 0.45);
         line-height: 1;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        transition: transform 200ms ease;
+      }
+
+      .tile:hover .tile-icon {
+        transform: scale(1.1);
       }
 
       .tile-name {
-        font-size: clamp(1rem, 2vw, 1.25rem);
+        font-size: calc(var(--tile-size) * 0.12);
         font-weight: 600;
+        text-align: center;
         opacity: 0.9;
+        max-width: 90%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: opacity 200ms ease;
+      }
+
+      .tile:hover .tile-name {
+        opacity: 1;
       }
 
       footer {
-        text-align: center;
-        font-size: 0.75rem;
+        height: var(--footer-height);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: clamp(0.625rem, 1.2vmin, 0.875rem);
         color: var(--text-muted);
+        position: relative;
+        z-index: 10;
       }
 
-      .grid.few-items {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      }
-      .grid.few-items .tile {
-        aspect-ratio: 1.2;
+      .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 2rem;
       }
 
-      @media (max-width: 600px) {
-        body {
-          padding: 1rem;
-          gap: 1rem;
-        }
-        .grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: 1rem;
-        }
-        .tile {
-          border-radius: 16px;
-          aspect-ratio: 1;
-        }
+      .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
       }
     </style>
   </head>
@@ -154,15 +236,102 @@
       <h1>Dashboard</h1>
     </header>
 
-    <div class="grid" id="grid">
-      <!-- TILES -->
-    </div>
+    <main>
+      <div class="grid" id="grid">
+        <!-- TILES -->
+      </div>
+    </main>
 
     <footer>Auto-generated</footer>
 
     <script>
-      const grid = document.getElementById("grid");
-      if (grid.children.length <= 4) grid.classList.add("few-items");
+      (function() {
+        const grid = document.getElementById('grid');
+        const root = document.documentElement;
+        const tiles = grid.querySelectorAll('.tile');
+        const itemCount = tiles.length;
+
+        // Calculate optimal grid layout
+        function calculateGrid() {
+          if (itemCount === 0) {
+            grid.innerHTML = `
+              <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div>No apps configured</div>
+              </div>
+            `;
+            return;
+          }
+
+          const headerHeight = parseInt(getComputedStyle(root).getPropertyValue('--header-height'));
+          const footerHeight = parseInt(getComputedStyle(root).getPropertyValue('--footer-height'));
+          const gap = parseInt(getComputedStyle(root).getPropertyValue('--gap')) || 16;
+          
+          const availableWidth = window.innerWidth - (gap * 2);
+          const availableHeight = window.innerHeight - headerHeight - footerHeight - (gap * 2);
+          
+          // Calculate optimal grid dimensions
+          const viewportRatio = availableWidth / availableHeight;
+          
+          // Start with square-ish estimate
+          let cols = Math.ceil(Math.sqrt(itemCount * viewportRatio));
+          let rows = Math.ceil(itemCount / cols);
+          
+          // Optimize to fit all items while maintaining square-ish ratio
+          let bestCols = cols;
+          let bestRows = rows;
+          let bestRatio = cols / rows;
+          let bestDiff = Math.abs(bestRatio - viewportRatio);
+          
+          // Try different configurations
+          for (let c = 1; c <= itemCount; c++) {
+            const r = Math.ceil(itemCount / c);
+            const ratio = c / r;
+            const diff = Math.abs(ratio - viewportRatio);
+            
+            if (diff < bestDiff || (diff === bestDiff && c * r < bestCols * bestRows)) {
+              bestDiff = diff;
+              bestCols = c;
+              bestRows = r;
+            }
+            
+            // Stop if we've found a good enough fit
+            if (diff < 0.1 && c * r === itemCount) break;
+          }
+          
+          // Calculate tile size
+          const tileWidth = (availableWidth - (bestCols - 1) * gap) / bestCols;
+          const tileHeight = (availableHeight - (bestRows - 1) * gap) / bestRows;
+          const tileSize = Math.min(tileWidth, tileHeight);
+          
+          // Update CSS custom properties
+          root.style.setProperty('--tile-size', `${tileSize}px`);
+          root.style.setProperty('--grid-cols', bestCols);
+          root.style.setProperty('--grid-rows', bestRows);
+          
+          // Add staggered animation delays
+          tiles.forEach((tile, index) => {
+            tile.style.animationDelay = `${index * 50}ms`;
+          });
+        }
+
+        // Initial calculation
+        calculateGrid();
+
+        // Recalculate on resize with debounce
+        let resizeTimeout;
+        const resizeObserver = new ResizeObserver(() => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(calculateGrid, 100);
+        });
+
+        resizeObserver.observe(document.body);
+
+        // Cleanup
+        window.addEventListener('beforeunload', () => {
+          resizeObserver.disconnect();
+        });
+      })();
     </script>
   </body>
 </html>
