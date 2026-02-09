@@ -8,21 +8,25 @@ echo "🚀 Starting Termux-VPS Stack..."
 # 1. Dependency Check
 echo "📦 Checking dependencies..."
 
-# Enable TUR (Termux User Repository) for qbittorrent and filebrowser
-if ! pkg list-installed 2>/dev/null | grep -q "tur-repo"; then
-    echo "   Enabling TUR repository..."
-    pkg install tur-repo -y
-    pkg update -y
+# A. Core Tools
+pkg install git nodejs-lts python make clang binutils tur-repo -y
+pkg update -y # Refresh after adding tur-repo
+
+# B. qBittorrent (from TUR repo)
+if ! command -v qbittorrent-nox &> /dev/null; then
+    echo "   Installing qBittorrent..."
+    pkg install qbittorrent-nox -y
 fi
 
-# Essential packages
-PKGS="nodejs qbittorrent-nox filebrowser cloudflared git build-essential python3 make clang binutils"
-for pkg in $PKGS; do
-    if ! command -v $pkg &> /dev/null && ! pkg list-installed $pkg &> /dev/null; then
-        echo "   Installing $pkg..."
-        pkg install $pkg -y
-    fi
-done
+# C. Filebrowser (Manual Install)
+if ! command -v filebrowser &> /dev/null; then
+    echo "   Installing Filebrowser..."
+    # Install to Termux bin folder
+    curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash -s -- -b "$PREFIX/bin"
+fi
+
+# D. Cloudflared & PM2
+pkg install cloudflared -y
 
 # 2. PM2 Global Install (if missing)
 if ! command -v pm2 &> /dev/null; then
@@ -35,22 +39,29 @@ BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 
 # --- A. qBittorrent ---
 echo "📥 Starting qBittorrent..."
-# Use absolute path if command -v fails, but here we expect it in PATH
-pm2 start qbittorrent-nox --name torrent -- --webui-port=8082
+pm2 start qbittorrent-nox --name torrent -- --webui-port=8082 --daemon=false
 
 # --- B. File Browser ---
 echo "📂 Starting File Browser..."
+# Note: Root is set to phone's Download folder
 pm2 start filebrowser --name files -- -p 8081 -r /sdcard/Download
 
 # --- C. Uptime Kuma ---
 if [ ! -d "$HOME/uptime-kuma" ]; then
     echo "📈 Downloading Uptime Kuma..."
     git clone https://github.com/louislam/uptime-kuma.git ~/uptime-kuma
-    cd ~/uptime-kuma && npm run setup
+    cd ~/uptime-kuma
+    
+    echo "🔨 Building Uptime Kuma (This may take a while)..."
+    # Fix for Termux/Android builds
+    export CXX=clang++
+    export CC=clang
+    export PYTHON=python3
+    npm run setup
+    
     cd "$BASE_DIR"
 fi
 echo "📈 Starting Uptime Kuma..."
-# Note: If sqlite3 compilation still fails, Kuma might be in a broken state.
 pm2 start "node server/server.js --port=3001" --name uptime --cwd ~/uptime-kuma
 
 # --- D. Custom Apps (WhatsApp Bot, etc.) ---
@@ -60,7 +71,7 @@ for app_dir in "$BASE_DIR"/apps/*; do
         if [[ "$app_name" != "uptime-kuma" ]]; then # Handled above
             echo "🤖 Starting $app_name..."
             (cd "$app_dir" && npm install)
-            pm2 start "node index.js" --name "$app_name" --cwd "$app_dir"
+            pm2 start "$app_dir/index.js" --name "$app_name" --cwd "$app_dir"
         fi
     fi
 done
@@ -77,7 +88,7 @@ fi
 pm2 save
 echo "---------------------------------------------------"
 echo "🎉 All services are UP!"
-echo "👉 Local IP: $(ifconfig | grep -A 1 'wlan0' | grep 'inet ' | awk '{print $2}')"
 echo "👉 Type 'pm2 list' to see status."
 echo "👉 Type 'pm2 logs' to see application logs."
+echo "👉 Type 'pm2 stop all' to shut down everything."
 echo "---------------------------------------------------"
