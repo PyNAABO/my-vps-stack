@@ -5,8 +5,8 @@ services:
     restart: always
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../../config/dozzle/users.yml:/data/users.yml
     ports:
       - "9999:8080"
     environment:
-      DOZZLE_AUTH_USERNAME: admin
-      DOZZLE_AUTH_PASSWORD: adminadmin1234
+      DOZZLE_AUTH_PROVIDER: simple
