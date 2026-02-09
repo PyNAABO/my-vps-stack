@@ -79,8 +79,9 @@ pkg install root-repo x11-repo tur-repo -y
 pkg update -y
 
 # Install core packages including build tools for native modules
+# Install core packages including build tools for native modules
 # python-is-python3 is helpful if available, otherwise we alias
-pkg install git nodejs-lts python make clang binutils rust pkg-config -y
+pkg install git nodejs-lts python make clang binutils rust pkg-config tar -y
 
 # Ensure python3 is available as python (for node-gyp)
 if ! command -v python &> /dev/null; then
@@ -141,20 +142,22 @@ if [ -d "$BASE_DIR/apps/uptime-kuma" ]; then
         
         cd "$HOME/uptime-kuma" || exit
         
-        # Configure npm to use python3
+        # Configure npm to use python3 and bypass NDK check for sqlite3
+        export PYTHON=python3
+        export GYP_DEFINES="android_ndk_path=''"
         npm config set python python3
         
-        # Initial setup - if this fails, we might need manual intervention for sqlite3
-        if ! npm run setup; then
+        # Initial setup - using npm install instead of ci to be more lenient
+        if ! npm install --no-audit --no-fund; then
             log_warn "Standard setup failed. Attempting to fix sqlite3 build..."
-            # Try to install sqlite3 with build-from-source and specific flags
-            # Termux often needs these for native compilation
-            npm install sqlite3 --build-from-source --python=python3
+            # Try to install sqlite3 with build-from-source
+            npm install sqlite3 --build-from-source
             
-            # Retry setup without full install if possible, or just install remaining deps
-            npm ci --omit dev
-            npm run download-dist
+            # Retry install
+            npm install --no-audit --no-fund
         fi
+        
+        npm run download-dist
         
         cd - || exit
     fi
@@ -219,6 +222,9 @@ $(
         echo "      cwd: process.env.HOME + \"/uptime-kuma\","
         echo "      interpreter: \"node\","
         echo "      env: {"
+        echo "        \"ALLOWED_GROUP_ID\": \"$ALLOWED_GROUP_ID\","
+        echo "        \"TG_BOT_TOKEN\": \"$TG_BOT_TOKEN\","
+        echo "        \"TUNNEL_TOKEN\": \"$TUNNEL_TOKEN\","
         if [ -f "$ENV_FILE" ]; then
             while IFS='=' read -r key val; do
                 [[ \$key =~ ^#.* ]] && continue
@@ -254,6 +260,9 @@ $(
                 
                 # 1. Inject Global .env
                 if [ -f "$ENV_FILE" ]; then
+                    echo "        \"ALLOWED_GROUP_ID\": \"$ALLOWED_GROUP_ID\","
+                    echo "        \"TG_BOT_TOKEN\": \"$TG_BOT_TOKEN\","
+                    echo "        \"TUNNEL_TOKEN\": \"$TUNNEL_TOKEN\","
                     while IFS='=' read -r key val; do
                         [[ \$key =~ ^#.* ]] && continue
                         [[ -z \$key ]] && continue
@@ -291,6 +300,9 @@ $(
                 echo "      env: {"
                  # 1. Inject Global .env
                 if [ -f "$ENV_FILE" ]; then
+                    echo "        \"ALLOWED_GROUP_ID\": \"$ALLOWED_GROUP_ID\","
+                    echo "        \"TG_BOT_TOKEN\": \"$TG_BOT_TOKEN\","
+                    echo "        \"TUNNEL_TOKEN\": \"$TUNNEL_TOKEN\","
                     while IFS='=' read -r key val; do
                         [[ \$key =~ ^#.* ]] && continue
                         [[ -z \$key ]] && continue
