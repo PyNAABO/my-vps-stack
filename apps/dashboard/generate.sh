@@ -5,24 +5,38 @@
 DOMAIN="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE="$SCRIPT_DIR/template.html"
+ICON_CONF="$SCRIPT_DIR/icons.conf"
 OUTPUT_DIR="config/dashboard"
 OUTPUT_FILE="$OUTPUT_DIR/index.html"
 TILES_FILE="/tmp/dashboard_tiles.html"
 
 mkdir -p "$OUTPUT_DIR"
 
-# Icon mapping
+# Load icons from config file (if exists) + hardcoded defaults
 get_icon() {
-  case "$1" in
-    portainer) echo "🐳" ;;
-    filebrowser) echo "📁" ;;
-    qbittorrent) echo "⬇️" ;;
-    uptime-kuma) echo "📊" ;;
-    telegram-bot) echo "🤖" ;;
-    whatsapp-bot) echo "💬" ;;
-    glances) echo "🖥️" ;;
-    *) echo "🔗" ;;
-  esac
+  local app_name="$1"
+  local icon=""
+  
+  # First check config file (user can override)
+  if [ -f "$ICON_CONF" ]; then
+    icon=$(grep "^${app_name}=" "$ICON_CONF" | cut -d'=' -f2)
+  fi
+  
+  # If not found in config, use defaults
+  if [ -z "$icon" ]; then
+    case "$app_name" in
+      portainer) echo "🐳" ;;
+      filebrowser) echo "📁" ;;
+      qbittorrent) echo "⬇️" ;;
+      uptime-kuma) echo "📊" ;;
+      telegram-bot) echo "🤖" ;;
+      whatsapp-bot) echo "💬" ;;
+      glances) echo "🖥️" ;;
+      *) echo "🔗" ;;
+    esac
+  else
+    echo "$icon"
+  fi
 }
 
 # Build tiles HTML to temp file

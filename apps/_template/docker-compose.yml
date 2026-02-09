@@ -1,0 +1,14 @@
+services:
+  myapp:
+    image: myapp/image:latest
+    container_name: myapp
+    restart: always
+    # Expose port if needed (or use ingress.yml for tunnel access)
+    ports:
+      - "3000:3000"
+    # Add volumes for persistence
+    # volumes:
+    #   - ./data:/app/data
+    # Environment variables (auto-injected from .env)
+    # environment:
+    #   - MYAPP_SECRET=${MYAPP_SECRET}

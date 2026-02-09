@@ -1,0 +1,4 @@
+# Only needed if you want web access via Cloudflare Tunnel
+# This creates: hostname.yourdomain.com
+hostname: myapp
+service: http://myapp:3000

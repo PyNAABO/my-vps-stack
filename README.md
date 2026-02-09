@@ -9,6 +9,11 @@ A **modular, plug-and-play** Infrastructure as Code (IaC) configuration for depl
 ```
 my-vps-stack/
 ├── apps/                    # 👈 Each app = one folder
+│   ├── _template/           # 👈 Copy this to create new apps
+│   │   ├── docker-compose.yml
+│   │   ├── ingress.yml
+│   │   ├── init.sh
+│   │   └── README.md
 │   ├── portainer/
 │   │   ├── docker-compose.yml
 │   │   └── ingress.yml      # Tunnel routing
@@ -61,6 +66,30 @@ my-vps-stack/
 
 ## **➕ Adding a New App**
 
+### Quick Method (Copy Template)
+
+```bash
+# 1. Copy template folder
+cp -r apps/_template apps/myapp
+
+# 2. Edit docker-compose.yml
+cd apps/myapp
+nano docker-compose.yml
+
+# 3. Optional: Add web access
+nano ingress.yml
+
+# 4. Optional: Add custom dashboard icon
+echo "myapp=🚀" >> ../dashboard/icons.conf
+
+# 5. Commit and push
+git add ..
+git commit -m "Add myapp"
+git push
+```
+
+### Manual Method
+
 1. Create folder: `apps/myapp/`
 2. Add `docker-compose.yml`:
    ```yaml
@@ -77,13 +106,62 @@ my-vps-stack/
    ```
 4. Push to GitHub. **That's it!** 🎉
 
-> The deploy workflow auto-generates `docker-compose.yml` from all `apps/*/docker-compose.yml` files.
+### What Happens Automatically
 
-> [!IMPORTANT]
-> **If your app needs secrets** (API keys, tokens, etc.), you must:
->
-> 1. Add the secret to GitHub Repository Settings → Secrets
-> 2. Edit `.github/workflows/deploy.yml` to inject it into `.env` (see Step 5 in the script)
+The deploy workflow will:
+- ✅ Include your app in `docker-compose.yml`
+- ✅ Configure tunnel routing (if `ingress.yml` exists)
+- ✅ Add dashboard tile (if `ingress.yml` exists)
+- ✅ Run `init.sh` (if exists)
+
+### Config Directories & Permissions
+
+If your app needs persistent storage or config directories:
+
+1. **Create in `init.sh`:**
+   ```bash
+   #!/bin/bash
+   mkdir -p "$(dirname "$0")/data"
+   chown -R 1000:1000 "$(dirname "$0")/data"
+   ```
+
+2. **Mount in `docker-compose.yml`:**
+   ```yaml
+   volumes:
+     - ./data:/app/data
+   ```
+
+### Dashboard Icons
+
+Apps get a default 🔗 icon. For custom icons:
+
+1. Edit `apps/dashboard/icons.conf`:
+   ```
+   myapp=🚀
+   database=🗄️
+   ai=🤖
+   ```
+
+2. Or just use the default (works fine!)
+
+### Environment Variables & Secrets
+
+**Option A: Use existing secrets** (if applicable)
+- `DOMAIN_NAME` - Your domain
+- `TG_BOT_TOKEN` - Telegram bot token
+
+**Option B: Add new secrets** (for app-specific API keys, etc.):
+
+1. Add to GitHub → Settings → Secrets and variables → Actions
+2. Edit `.github/workflows/deploy.yml` Step 5:
+   ```bash
+   echo "MYAPP_API_KEY=${{ secrets.MYAPP_API_KEY }}" >> .env
+   ```
+3. Use in your `docker-compose.yml`:
+   ```yaml
+   environment:
+     - API_KEY=${MYAPP_API_KEY}
+   ```
 
 ## **➖ Removing an App**
 
