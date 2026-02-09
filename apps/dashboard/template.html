@@ -8,6 +8,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%238b5cf6'/%3E%3Crect x='20' y='20' width='25' height='25' rx='6' fill='white'/%3E%3Crect x='55' y='20' width='25' height='25' rx='6' fill='white'/%3E%3Crect x='20' y='55' width='25' height='25' rx='6' fill='white'/%3E%3Crect x='55' y='55' width='25' height='25' rx='6' fill='white'/%3E%3C/svg%3E" />
     <style>
       * {
         margin: 0;
@@ -273,39 +274,38 @@
           // Calculate optimal grid dimensions
           const viewportRatio = availableWidth / availableHeight;
           
-          // Start with square-ish estimate
-          let cols = Math.ceil(Math.sqrt(itemCount * viewportRatio));
-          let rows = Math.ceil(itemCount / cols);
+          let bestCols = 1;
+          let bestRows = itemCount;
+          let bestTileSize = 0;
           
-          // Optimize to fit all items while maintaining square-ish ratio
-          let bestCols = cols;
-          let bestRows = rows;
-          let bestRatio = cols / rows;
-          let bestDiff = Math.abs(bestRatio - viewportRatio);
-          
-          // Try different configurations
-          for (let c = 1; c <= itemCount; c++) {
-            const r = Math.ceil(itemCount / c);
-            const ratio = c / r;
-            const diff = Math.abs(ratio - viewportRatio);
+          // Try all possible configurations to maximize tile size
+          for (let cols = 1; cols <= itemCount; cols++) {
+            const rows = Math.ceil(itemCount / cols);
             
-            if (diff < bestDiff || (diff === bestDiff && c * r < bestCols * bestRows)) {
-              bestDiff = diff;
-              bestCols = c;
-              bestRows = r;
+            // Calculate tile size for this configuration
+            const tileWidth = (availableWidth - (cols - 1) * gap) / cols;
+            const tileHeight = (availableHeight - (rows - 1) * gap) / rows;
+            const tileSize = Math.min(tileWidth, tileHeight);
+            
+            // Check if this configuration is better
+            // We prioritize larger tile sizes
+            if (tileSize > bestTileSize) {
+              bestTileSize = tileSize;
+              bestCols = cols;
+              bestRows = rows;
+            } else if (tileSize === bestTileSize) {
+              // If tile sizes are equal, prefer more square-ish layouts
+              const currentSquareness = Math.abs(cols - rows);
+              const bestSquareness = Math.abs(bestCols - bestRows);
+              if (currentSquareness < bestSquareness) {
+                bestCols = cols;
+                bestRows = rows;
+              }
             }
-            
-            // Stop if we've found a good enough fit
-            if (diff < 0.1 && c * r === itemCount) break;
           }
           
-          // Calculate tile size
-          const tileWidth = (availableWidth - (bestCols - 1) * gap) / bestCols;
-          const tileHeight = (availableHeight - (bestRows - 1) * gap) / bestRows;
-          const tileSize = Math.min(tileWidth, tileHeight);
-          
           // Update CSS custom properties
-          root.style.setProperty('--tile-size', `${tileSize}px`);
+          root.style.setProperty('--tile-size', `${bestTileSize}px`);
           root.style.setProperty('--grid-cols', bestCols);
           root.style.setProperty('--grid-rows', bestRows);
           
