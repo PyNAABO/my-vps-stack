@@ -5,19 +5,89 @@
 
 # Global Variables
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+ENV_FILE="$BASE_DIR/.env"
 
-echo "🚀 Starting Termux-VPS Stack..."
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+log_info() { echo -e "${GREEN}ℹ️  $1${NC}"; }
+log_warn() { echo -e "${YELLOW}⚠️  $1${NC}"; }
+log_error() { echo -e "${RED}❌ $1${NC}"; }
+
+echo -e "🚀 ${GREEN}Starting Termux-VPS Stack...${NC}"
+
+# --- 0. Interactive Configuration Wizard ---
+if [ ! -f "$ENV_FILE" ]; then
+    log_warn "Configuration file (.env) not found. Creating one..."
+    touch "$ENV_FILE"
+fi
+
+# Function to update .env
+update_env() {
+    local key=$1
+    local value=$2
+    if grep -q "^$key=" "$ENV_FILE"; then
+        sed -i "s|^$key=.*|$key=$value|" "$ENV_FILE"
+    else
+        echo "$key=$value" >> "$ENV_FILE"
+    fi
+}
+
+# Check for essential variables
+source "$ENV_FILE"
+
+if [ -z "$ALLOWED_GROUP_ID" ]; then
+    echo "---------------------------------------------------"
+    log_warn "Missing WhatsApp ALLOWED_GROUP_ID"
+    echo "This is required for the WhatsApp bot to know which group to listen to."
+    read -p "Enter WhatsApp Group ID (e.g., 12036302...): " input_gid
+    if [ -n "$input_gid" ]; then
+        update_env "ALLOWED_GROUP_ID" "$input_gid"
+        export ALLOWED_GROUP_ID="$input_gid"
+    fi
+fi
+
+if [ -z "$TG_BOT_TOKEN" ]; then
+    echo "---------------------------------------------------"
+    log_warn "Missing Telegram TG_BOT_TOKEN"
+    read -p "Enter Telegram Bot Token: " input_token
+    if [ -n "$input_token" ]; then
+        update_env "TG_BOT_TOKEN" "$input_token"
+        export TG_BOT_TOKEN="$input_token"
+    fi
+fi
+
+if [ -z "$TUNNEL_TOKEN" ] && [ -z "$CLOUDFLARED_TUNNEL_TOKEN" ]; then
+    echo "---------------------------------------------------"
+    echo "Cloudflare Tunnel Token (Optional but recommended for public access)"
+    read -p "Enter Cloudflare Tunnel Token (leave empty to skip): " input_tunnel
+    if [ -n "$input_tunnel" ]; then
+        update_env "TUNNEL_TOKEN" "$input_tunnel"
+        export TUNNEL_TOKEN="$input_tunnel"
+    fi
+fi
 
 # 1. Dependency Check
-echo "📦 Checking dependencies..."
+log_info "Checking dependencies..."
 
 # A. Core Tools & Repos
 # Ensure all necessary repos are enabled
 pkg install root-repo x11-repo tur-repo -y
 pkg update -y
 
-# Install core packages
-pkg install git nodejs-lts python make clang binutils -y
+# Install core packages including build tools for native modules
+# python-is-python3 is helpful if available, otherwise we alias
+pkg install git nodejs-lts python make clang binutils rust pkg-config -y
+
+# Ensure python3 is available as python (for node-gyp)
+if ! command -v python &> /dev/null; then
+    if command -v python3 &> /dev/null; then
+        ln -s $(command -v python3) $PREFIX/bin/python
+    fi
+fi
 
 # B. qBittorrent (Attempt Install)
 if [ -d "$BASE_DIR/apps/qbittorrent" ]; then
@@ -25,9 +95,9 @@ if [ -d "$BASE_DIR/apps/qbittorrent" ]; then
         echo "   Installing qBittorrent..."
         # Try installing from main or TUR repo
         if pkg install qbittorrent-nox -y; then
-            echo "✅ qBittorrent installed."
+            log_info "qBittorrent installed."
         else
-            echo "⚠️  qBittorrent-nox package not found in default/TUR repos."
+            log_warn "qBittorrent-nox package not found in default/TUR repos."
             echo "   You may need to install it manually or use proot-distro."
         fi
     fi
@@ -48,7 +118,7 @@ if [ -d "$BASE_DIR/apps/filebrowser" ]; then
         # Create DB and add admin user
         filebrowser config init -d "$HOME/.filebrowser.db" > /dev/null 2>&1
         filebrowser users add admin adminadmin1234 --perm.admin -d "$HOME/.filebrowser.db" > /dev/null 2>&1
-        echo "✅ FileBrowser initialized with default credentials (admin/adminadmin1234)"
+        log_info "FileBrowser initialized with default credentials (admin/adminadmin1234)"
     fi
 else
     echo "⏭️  Skipping Filebrowser (apps/filebrowser not found)."
@@ -61,27 +131,35 @@ if [ -d "$BASE_DIR/apps/uptime-kuma" ]; then
         echo "   Cloning Uptime Kuma..."
         git clone https://github.com/louislam/uptime-kuma.git "$HOME/uptime-kuma"
     else
-        echo "✅ Uptime Kuma directory found."
+        log_info "Uptime Kuma directory found."
     fi
 
     # Check for node_modules and install if missing
     if [ ! -d "$HOME/uptime-kuma/node_modules" ]; then
-        echo "   Installing Uptime Kuma dependencies (this may take a while)..."
+        echo "   Installing Uptime Kuma dependencies..."
+        echo "   (This may take a while due to native module compilation on Termux)"
+        
         cd "$HOME/uptime-kuma" || exit
-        npm run setup
+        
+        # Configure npm to use python3
+        npm config set python python3
+        
+        # Initial setup - if this fails, we might need manual intervention for sqlite3
+        if ! npm run setup; then
+            log_warn "Standard setup failed. Attempting to fix sqlite3 build..."
+            # Try to install sqlite3 with build-from-source and specific flags
+            # Termux often needs these for native compilation
+            npm install sqlite3 --build-from-source --python=python3
+            
+            # Retry setup without full install if possible, or just install remaining deps
+            npm ci --omit dev
+            npm run download-dist
+        fi
+        
         cd - || exit
     fi
 else
     echo "⏭️  Skipping Uptime Kuma (apps/uptime-kuma not found)."
-fi
-
-# E. Global Environment Config (Docker-Compose style)
-ENV_FILE="$BASE_DIR/.env"
-if [ ! -f "$ENV_FILE" ]; then
-    echo "⚠️  Creating dummy .env in root directory..."
-    echo "# Termux-VPS Stack Configuration" > "$ENV_FILE"
-    echo "ALLOWED_GROUP_ID=123456789" >> "$ENV_FILE"
-    echo "⚠️  PLEASE EDIT $ENV_FILE with your real settings!"
 fi
 
 # F. Cloudflared
@@ -89,12 +167,12 @@ pkg install cloudflared -y
 
 # 2. PM2 Global Install (if missing)
 if ! command -v pm2 &> /dev/null; then
-    echo "🚀 Installing PM2 via npm..."
+    log_info "Installing PM2 via npm..."
     npm install -g pm2
 fi
 
 # 3b. Install Python Dependencies (if any)
-echo "🐍 Checking Python Dependencies..."
+log_info "Checking Python Dependencies..."
 for app_dir in "$BASE_DIR"/apps/*; do
     if [ -d "$app_dir" ]; then
         if [ -f "$app_dir/requirements.txt" ]; then
