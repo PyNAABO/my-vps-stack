@@ -19,6 +19,22 @@ log_error() { echo -e "${RED}❌ $1${NC}"; }
 
 echo -e "🚀 ${GREEN}Starting Termux-VPS Stack...${NC}"
 
+# --- Check Storage Access ---
+if [ ! -r "/sdcard" ]; then
+    log_warn "Storage access permission is missing!"
+    echo "File Browser needs access to shared storage (/sdcard)."
+    echo "A popup will appear asking for permission."
+    termux-setup-storage
+    echo "👉 Please GRANT permission in the popup."
+    read -p "Press [Enter] once you have granted permission..."
+    
+    if [ ! -r "/sdcard" ]; then
+        log_error "Still cannot access /sdcard. Please check permissions in Android Settings -> Apps -> Termux."
+        exit 1
+    fi
+    log_info "Storage access granted."
+fi
+
 # --- 0. Interactive Configuration Wizard ---
 if [ ! -f "$ENV_FILE" ]; then
     log_warn "Configuration file (.env) not found. Creating one..."
