@@ -9,7 +9,7 @@ A **modular, plug-and-play** Infrastructure as Code (IaC) configuration for depl
 ```
 my-vps-stack/
 ├── apps/                    # 👈 Each app = one folder
-│   ├── _template/           # 👈 Copy this to create new apps
+│   ├── .template/           # 👈 Copy this to create new apps
 │   │   ├── docker-compose.yml
 │   │   ├── ingress.yml
 │   │   ├── init.sh
@@ -70,7 +70,7 @@ my-vps-stack/
 
 ```bash
 # 1. Copy template folder
-cp -r apps/_template apps/myapp
+cp -r apps/.template apps/myapp
 
 # 2. Edit docker-compose.yml
 cd apps/myapp

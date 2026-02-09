@@ -96,7 +96,7 @@ If your app needs secrets:
 
 ```bash
 # 1. Copy template
-cp -r apps/_template apps/myapp
+cp -r apps/.template apps/myapp
 
 # 2. Edit files
 cd apps/myapp

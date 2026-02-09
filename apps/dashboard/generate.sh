@@ -33,13 +33,13 @@ get_icon() {
 }
 
 # Build tiles HTML to temp file
+# Note: Dot-prefixed folders (.template, .archive) are automatically excluded by glob
 > "$TILES_FILE"
 for ingress_file in apps/*/ingress.yml; do
   [ -f "$ingress_file" ] || continue
   
   app_name=$(basename "$(dirname "$ingress_file")")
   [ "$app_name" = "dashboard" ] && continue
-  [ "$app_name" = "_template" ] && continue
   
   if command -v yq &>/dev/null; then
     hostname=$(yq '.hostname' "$ingress_file")
