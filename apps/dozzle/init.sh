@@ -5,8 +5,13 @@ mkdir -p config/dozzle
 
 if [ ! -s config/dozzle/users.yml ] || ! grep -q "admin" config/dozzle/users.yml; then
   echo "🔑 Generating Dozzle users.yml..."
-  # Generate admin user with password adminadmin1234
-  docker run --rm amir20/dozzle:latest generate --user admin --password adminadmin1234 > config/dozzle/users.yml
+  cat <<EOF > config/dozzle/users.yml
+users:
+  - username: admin
+    password: \$2b\$10\$ySjC8IQdII482vNmny9QZeNcJBQe/xJeqAZYFk/gcz3fe2cyrRlAG
+    name: Admin User
+    email: admin@example.com
+EOF
   chmod 644 config/dozzle/users.yml
   echo "✅ Dozzle users.yml generated"
 else
