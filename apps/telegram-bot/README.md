@@ -34,11 +34,22 @@ To get a bot token:
 
 ## Files
 
-| File               | Purpose                            |
-| ------------------ | ---------------------------------- |
-| `bot.py`           | Main bot logic                     |
-| `Dockerfile`       | Python 3.12 Alpine container       |
-| `requirements.txt` | Dependencies (python-telegram-bot) |
+| File               | Purpose                               |
+| ------------------ | ------------------------------------- |
+| `bot.py`           | Main bot logic                        |
+| `Dockerfile`       | Python 3.12 Alpine container          |
+| `requirements.txt` | Dependencies (python-telegram-bot)    |
+| `init.sh`          | Placeholder for future initialization |
+
+## Initialization
+
+> [!NOTE]
+> This app includes an `init.sh` placeholder script. When volumes are added in the future, update this script to set proper permissions (similar to `whatsapp-bot/init.sh`).
+
+## Security
+
+> [!NOTE]
+> This container runs as the `nobody` user (non-root) for security best practices.
 
 ## Adding New Commands
 

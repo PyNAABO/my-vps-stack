@@ -20,6 +20,7 @@ get_icon() {
     uptime-kuma) echo "📊" ;;
     telegram-bot) echo "🤖" ;;
     whatsapp-bot) echo "💬" ;;
+    glances) echo "🖥️" ;;
     *) echo "🔗" ;;
   esac
 }

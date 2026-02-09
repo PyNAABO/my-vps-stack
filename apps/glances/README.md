@@ -6,7 +6,7 @@ A cross-platform system monitoring tool which provides a real-time overview of y
 
 ## 🚀 Usage
 
-- **URL:** `https://glances.your-domain.com`
+- **URL:** `https://monitor.your-domain.com`
 - **Default Credentials:** None (Open access by default configuration).
 
 ## 💾 Volumes
