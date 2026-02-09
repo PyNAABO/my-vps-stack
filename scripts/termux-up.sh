@@ -44,7 +44,7 @@ pm2 start qbittorrent-nox --name torrent -- --webui-port=8082 --daemon=false
 # --- B. File Browser ---
 echo "📂 Starting File Browser..."
 # Note: Root is set to phone's Download folder
-pm2 start filebrowser --name files -- -p 8081 -r /sdcard/Download
+pm2 start filebrowser --name files -- -p 8081 -a 0.0.0.0 -r /sdcard/Download
 
 # --- C. Uptime Kuma ---
 if [ ! -d "$HOME/uptime-kuma" ]; then
