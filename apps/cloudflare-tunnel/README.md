@@ -6,7 +6,7 @@ Exposes your private services to the internet without opening ports.
 
 ## 🚀 Usage
 
-- **Status:** Runs in background. Check logs via Dozzle.
+- **Status:** Runs in background. Check logs via `docker logs`.
 - **Command:** `cloudflared tunnel run`
 
 ## ⚙️ Configuration

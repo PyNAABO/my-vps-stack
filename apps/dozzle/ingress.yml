@@ -1,2 +1,0 @@
-hostname: logs
-service: http://dozzle:8080

@@ -15,7 +15,6 @@ mkdir -p "$OUTPUT_DIR"
 get_icon() {
   case "$1" in
     portainer) echo "🐳" ;;
-    dozzle) echo "📜" ;;
     filebrowser) echo "📁" ;;
     qbittorrent) echo "⬇️" ;;
     uptime-kuma) echo "📊" ;;

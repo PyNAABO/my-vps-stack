@@ -38,7 +38,6 @@ my-vps-stack/
 | **Dashboard**         | home.\*   | Auto-generated app launcher   | _(No setup needed)_       |
 | **Portainer**         | docker.\* | Docker management UI          | _(Setup on first launch)_ |
 | **Uptime Kuma**       | status.\* | Service monitoring            | _(Setup on first launch)_ |
-| **Dozzle**            | logs.\*   | Real-time container logs      | admin / adminadmin1234    |
 | **FileBrowser**       | drive.\*  | File manager / Streamer       | admin / adminadmin1234    |
 | **qBittorrent**       | seed.\*   | Torrent client                | _(Check docker logs)_     |
 | **Telegram Bot**      | -         | Basic Node Status (Ping/Time) | _(Token in secrets)_      |
@@ -170,13 +169,12 @@ docker compose up -d
 
 ## **🛠️ Utility Scripts**
 
-| Script                            | Description                       |
-| :-------------------------------- | :-------------------------------- |
-| `scripts/run_once.sh`             | Sets up `update` alias            |
-| `scripts/update.sh`               | System update script              |
-| `scripts/cloud_backup.sh`         | rclone backup to Google Drive     |
-| `scripts/list_subdomains.sh`      | Lists all configured subdomains   |
-| `scripts/generate_dozzle_auth.py` | Generates Dozzle auth (local use) |
+| Script                       | Description                     |
+| :--------------------------- | :------------------------------ |
+| `scripts/run_once.sh`        | Sets up `update` alias          |
+| `scripts/update.sh`          | System update script            |
+| `scripts/cloud_backup.sh`    | rclone backup to Google Drive   |
+| `scripts/list_subdomains.sh` | Lists all configured subdomains |
 
 > 📦 **Seedbox setup?** See [docs/Seedbox.md](docs/Seedbox.md)
 
