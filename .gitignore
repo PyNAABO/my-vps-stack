@@ -10,6 +10,7 @@ npm-debug.log
 config/tunnel/
 config/fb/
 config/qbit/
+config/dozzle/
 
 # Ignore Heavy Data
 downloads/
