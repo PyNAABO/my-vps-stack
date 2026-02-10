@@ -6,7 +6,7 @@ DOMAIN="$1"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 TEMPLATE="$SCRIPT_DIR/template.html"
 ICON_CONF="$SCRIPT_DIR/icons.conf"
-OUTPUT_DIR="config/dashboard"
+OUTPUT_DIR="$SCRIPT_DIR"
 OUTPUT_FILE="$OUTPUT_DIR/index.html"
 TILES_FILE="/tmp/dashboard_tiles.html"
 
