@@ -17,6 +17,9 @@ WebUI\Address=*
 WebUI\Port=8080
 Downloads\SavePath=/downloads
 Downloads\TempPath=/downloads/incomplete
+[BitTorrent]
+Session\DefaultSavePath=/downloads
+Session\TempPath=/downloads/incomplete
 EOF
   echo "✅ qBittorrent config created with correct paths."
 else
@@ -25,28 +28,48 @@ else
   # Note: qBittorrent.conf is INI-like but sometimes handled strictly. 
   # Safe approach: Check if key exists, if so replace, else append to [Preferences].
   
+  # Correct configuration for qBittorrent v4.x+
+  # Section: [BitTorrent], Key: Session\DefaultSavePath
+  
   CONF_FILE="$CONFIG_DIR/qBittorrent/qBittorrent.conf"
   
-  # Function to ensure config key exists
-  set_config() {
+  # Function to set config key in [BitTorrent] section
+  set_bittorrent_config() {
     key=$1
     value=$2
     if grep -q "^$key=" "$CONF_FILE"; then
       sed -i "s|^$key=.*|$key=$value|" "$CONF_FILE"
     else
-      # Append to [Preferences] section if it exists, otherwise just append to end
-      if grep -q "\[Preferences\]" "$CONF_FILE"; then
-        sed -i "/\[Preferences\]/a $key=$value" "$CONF_FILE"
+      if grep -q "\[BitTorrent\]" "$CONF_FILE"; then
+        sed -i "/\[BitTorrent\]/a $key=$value" "$CONF_FILE"
       else
-        echo -e "\n[Preferences]\n$key=$value" >> "$CONF_FILE"
+        echo -e "\n[BitTorrent]\n$key=$value" >> "$CONF_FILE"
       fi
     fi
   }
 
-  set_config "Downloads\\\SavePath" "/downloads"
-  set_config "Downloads\\\TempPath" "/downloads/incomplete"
+  set_bittorrent_config "Session\\\DefaultSavePath" "/downloads"
+  set_bittorrent_config "Session\\\TempPath" "/downloads/incomplete"
   
-  echo "✅ qBittorrent config patched with correct paths."
+  # Also set legacy keys just in case
+  # Function to set config key in [Preferences] section
+  set_pref_config() {
+     key=$1
+     value=$2
+     if grep -q "^$key=" "$CONF_FILE"; then
+       sed -i "s|^$key=.*|$key=$value|" "$CONF_FILE"
+     else
+       if grep -q "\[Preferences\]" "$CONF_FILE"; then
+         sed -i "/\[Preferences\]/a $key=$value" "$CONF_FILE"
+       else
+         echo -e "\n[Preferences]\n$key=$value" >> "$CONF_FILE"
+       fi
+     fi
+   }
+   set_pref_config "Downloads\\\SavePath" "/downloads"
+   set_pref_config "Downloads\\\TempPath" "/downloads/incomplete"
+  
+  echo "✅ qBittorrent config patched with correct paths (Session & Downloads)."
 fi
 
 # Ensure config permissions
