@@ -1,9 +1,9 @@
 #!/bin/bash
 # qBittorrent first-time setup
 
-# Base path relative to script
-BASE_DIR="$(dirname "$0")"
-CONFIG_DIR="$BASE_DIR/../../config/qbit"
+# Base path relative to script (resolved to absolute path)
+BASE_DIR="$(dirname "$(readlink -f "$0")")"
+CONFIG_DIR="$(readlink -f "$BASE_DIR/../../config/qbit")"
 
 mkdir -p "$CONFIG_DIR/qBittorrent"
 
@@ -18,4 +18,5 @@ EOF
   chown -R 1000:1000 "$CONFIG_DIR"
   echo "✅ qBittorrent config initialized"
 fi
+
 
