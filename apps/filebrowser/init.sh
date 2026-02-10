@@ -19,6 +19,10 @@ cat <<EOF > "$ABS_CONFIG_DIR/settings.json"
 }
 EOF
 
+# FORCE RESET: Delete existing DB to fix credentials
+echo "⚠️  Forcing FileBrowser DB reset..."
+rm -f "$ABS_CONFIG_DIR/filebrowser.db"
+
 # Initialize FileBrowser DB if missing
 if [ ! -s "$ABS_CONFIG_DIR/filebrowser.db" ]; then
   touch "$ABS_CONFIG_DIR/filebrowser.db"
