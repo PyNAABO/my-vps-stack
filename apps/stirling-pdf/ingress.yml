@@ -1,0 +1,2 @@
+hostname: pdf
+service: http://stirling-pdf:8080

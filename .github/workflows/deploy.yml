@@ -39,10 +39,15 @@ jobs:
             echo "# Add/remove apps by adding/removing folders in apps/" >> docker-compose.yml
             echo "" >> docker-compose.yml
             echo "include:" >> docker-compose.yml
-            for compose_file in apps/*/docker-compose.yml; do
-              if [ -f "$compose_file" ]; then
-                echo "  - $compose_file" >> docker-compose.yml
-                echo "  ✓ Included: $compose_file"
+            for app_dir in apps/*/; do
+              # Check for standard docker-compose.yml
+              if [ -f "${app_dir}docker-compose.yml" ]; then
+                echo "  - ${app_dir}docker-compose.yml" >> docker-compose.yml
+                echo "  ✓ Included: ${app_dir}docker-compose.yml"
+              # Check for new standard compose.yaml (e.g. created by Dockge)
+              elif [ -f "${app_dir}compose.yaml" ]; then
+                echo "  - ${app_dir}compose.yaml" >> docker-compose.yml
+                echo "  ✓ Included: ${app_dir}compose.yaml"
               fi
             done
 

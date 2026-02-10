@@ -1,0 +1,2 @@
+hostname: dockge
+service: http://dockge:5001

@@ -1,0 +1,2 @@
+hostname: play
+service: http://jellyfin:8096
