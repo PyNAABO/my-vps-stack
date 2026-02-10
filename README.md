@@ -42,7 +42,6 @@ my-vps-stack/
 | :-------------------- | :--------- | :---------------------------- | :------------------------- |
 | **Dashboard**         | home.\*    | Auto-generated app launcher   | _(No setup needed)_        |
 | **Portainer**         | docker.\*  | Docker management UI          | _(Setup on first launch)_  |
-| **Dockge**            | dockge.\*  | Docker Compose Manager        | _(Setup on first launch)_  |
 | **Uptime Kuma**       | status.\*  | Service monitoring            | _(Setup on first launch)_  |
 | **FileBrowser**       | drive.\*   | File manager / Streamer       | _(Check docker logs)_      |
 | **qBittorrent**       | seed.\*    | Torrent client                | _(Check docker logs)_      |
@@ -57,6 +56,7 @@ my-vps-stack/
 > **Archived Apps:** The following apps are in `apps/.archive/` and excluded from builds:
 >
 > - `changedetection` - Website change monitoring
+> - `dockge` - Docker Compose Manager
 > - `homarr` - Dashboard alternative
 > - `it-tools` - Developer utilities
 > - `n8n` - Workflow automation
