@@ -109,6 +109,7 @@ git push
 ### What Happens Automatically
 
 The deploy workflow will:
+
 - ✅ Include your app in `docker-compose.yml`
 - ✅ Configure tunnel routing (if `ingress.yml` exists)
 - ✅ Add dashboard tile (if `ingress.yml` exists)
@@ -119,6 +120,7 @@ The deploy workflow will:
 If your app needs persistent storage or config directories:
 
 1. **Create in `init.sh`:**
+
    ```bash
    #!/bin/bash
    mkdir -p "$(dirname "$0")/data"
@@ -136,6 +138,7 @@ If your app needs persistent storage or config directories:
 Apps get a default 🔗 icon. For custom icons:
 
 1. Edit `apps/dashboard/icons.conf`:
+
    ```
    myapp=🚀
    database=🗄️
@@ -147,6 +150,7 @@ Apps get a default 🔗 icon. For custom icons:
 ### Environment Variables & Secrets
 
 **Option A: Use existing secrets** (if applicable)
+
 - `DOMAIN_NAME` - Your domain
 - `TG_BOT_TOKEN` - Telegram bot token
 
@@ -186,7 +190,7 @@ docker compose up -d
 ```
 
 > [!TIP]
-> **Better Way:** checks the "Setup Automation" section below for the **Zero-Config** setup!
+> **Better Way:** Check the "Setup Automation" section below for the **Zero-Config** setup!
 
 _The stack will start within seconds._
 
