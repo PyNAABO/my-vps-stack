@@ -22,36 +22,31 @@ EOF
 # Initialize FileBrowser DB if missing
 if [ ! -s "$ABS_CONFIG_DIR/filebrowser.db" ]; then
   touch "$ABS_CONFIG_DIR/filebrowser.db"
-  chown -R 1000:1000 "$ABS_CONFIG_DIR"
-  chmod 644 "$ABS_CONFIG_DIR/filebrowser.db"
-
   
-  docker run --rm \
-    -u 1000:1000 \
-    -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
   docker run --rm \
     -u 1000:1000 \
     -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
     -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
     filebrowser/filebrowser config init
     
-  docker run --rm \
-    -u 1000:1000 \
-    -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
-    -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
-    filebrowser/filebrowser users add admin adminadmin1234 --perm.admin || true
-    
-  docker run --rm \
-    -u 1000:1000 \
-    -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
-    -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
-    filebrowser/filebrowser users update admin --password adminadmin1234
-
-
-
-    
-  echo "✅ FileBrowser DB initialized with admin user"
-  echo "⚠️  WARNING: Default credentials are 'admin' / 'adminadmin1234'. Change them immediately!"
+  echo "✅ FileBrowser DB initialized"
 fi
 
+# Ensure correct ownership and force admin password on EVERY deploy
+chown -R 1000:1000 "$ABS_CONFIG_DIR"
+chmod 644 "$ABS_CONFIG_DIR/filebrowser.db"
 
+echo "🔄 Enforcing admin password..."
+docker run --rm \
+  -u 1000:1000 \
+  -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
+  -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
+  filebrowser/filebrowser users add admin adminadmin1234 --perm.admin || true
+
+docker run --rm \
+  -u 1000:1000 \
+  -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
+  -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
+  filebrowser/filebrowser users update admin --password adminadmin1234
+
+echo "✅ FileBrowser credentials secured: admin / adminadmin1234"
