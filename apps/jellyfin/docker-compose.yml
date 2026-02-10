@@ -8,7 +8,7 @@ services:
       - TZ=Asia/Kolkata
     volumes:
       - ../../config/jellyfin:/config
-      - /opt/seedbox:/data/media
+      - ../../../vps-data:/media
     ports:
       - "8096:8096"
     restart: always

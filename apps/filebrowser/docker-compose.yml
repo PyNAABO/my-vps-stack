@@ -8,7 +8,7 @@ services:
       - FB_ROOT=/srv
       - FB_LOG=stdout
     volumes:
-      - /opt/seedbox:/srv
+      - ../../../vps-data:/srv
       - ../../config/fb:/config
     ports:
       - "8081:80"

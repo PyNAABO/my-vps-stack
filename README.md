@@ -251,6 +251,24 @@ Create a wildcard CNAME: `*` → `<UUID>.cfargotunnel.com`
 > [!WARNING]
 > **The deploy workflow runs `git reset --hard`** on the VPS, which **wipes any local changes** (hot-fixes, manual config tweaks). Always commit changes back to the repo—never edit files directly on the VPS.
 
+## **📂 File Structure & Permissions**
+
+The stack enforces a standard directory structure using a shared `vps-data` folder located **next to** the repository (sibling directory).
+
+```
+/root/
+├── my-vps-stack/      # This repository
+└── vps-data/          # Shared data (Owned by 1000:1000)
+    ├── downloads/     # qBittorrent downloads
+    └── media/         # Jellyfin media library
+        ├── movies/
+        └── shows/
+```
+
+- **qBittorrent** writes to `/downloads` (mapped to `../vps-data/downloads`).
+- **Jellyfin** reads from `/media` (mapped to `../vps-data`).
+- **FileBrowser** manages `/srv` (mapped to `../vps-data`).
+
 ## **🐛 Troubleshooting**
 
 ```bash

@@ -12,7 +12,7 @@ A free software media system that lets you stream movies, TV shows, music, and m
 ## 💾 Volumes
 
 - `../../config/jellyfin`: Persistent configuration and metadata.
-- `/opt/seedbox`: Shared media library (same as qBittorrent downloads).
+- `../vps-data`: Shared media library (same as qBittorrent downloads).
 
 ## 📝 Notes
 

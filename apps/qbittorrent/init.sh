@@ -49,7 +49,17 @@ else
   echo "✅ qBittorrent config patched with correct paths."
 fi
 
-# Ensure permissions
+# Ensure config permissions
 chown -R 1000:1000 "$CONFIG_DIR"
+
+# Ensure downloads directory exists and has correct permissions
+# Resolve vps-data relative to this script (apps/qbittorrent/init.sh -> ../../../vps-data)
+DATA_DIR="$(readlink -f "$BASE_DIR/../../../vps-data")"
+DOWNLOADS_DIR="$DATA_DIR/downloads"
+
+if [ ! -d "$DOWNLOADS_DIR" ]; then
+  mkdir -p "$DOWNLOADS_DIR"
+fi
+chown -R 1000:1000 "$DATA_DIR"
 
 
