@@ -95,8 +95,6 @@ jobs:
             echo "TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}" >> .env
             echo "ALLOWED_GROUP_ID=${{ secrets.ALLOWED_GROUP_ID }}" >> .env
 
-            # 6. Generate Dashboard from ingress.yml files
-            bash apps/dashboard/generate.sh "${{ secrets.DOMAIN }}"
 
             # 7. Run init scripts for each app (first-time setup)
             # Note: Dot-prefixed folders (.template, .archive) are automatically excluded
