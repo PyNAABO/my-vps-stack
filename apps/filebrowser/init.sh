@@ -29,6 +29,9 @@ if [ ! -s "$ABS_CONFIG_DIR/filebrowser.db" ]; then
   docker run --rm \
     -u 1000:1000 \
     -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
+  docker run --rm \
+    -u 1000:1000 \
+    -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
     -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
     filebrowser/filebrowser config init
     
@@ -36,7 +39,14 @@ if [ ! -s "$ABS_CONFIG_DIR/filebrowser.db" ]; then
     -u 1000:1000 \
     -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
     -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
-    filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
+    filebrowser/filebrowser users add admin adminadmin1234 --perm.admin || \
+  docker run --rm \
+    -u 1000:1000 \
+    -v "$ABS_CONFIG_DIR/filebrowser.db":/database.db \
+    -v "$ABS_CONFIG_DIR/settings.json":/config/settings.json \
+    filebrowser/filebrowser users update admin --password adminadmin1234
+
+
     
   echo "✅ FileBrowser DB initialized with admin user"
   echo "⚠️  WARNING: Default credentials are 'admin' / 'adminadmin1234'. Change them immediately!"
