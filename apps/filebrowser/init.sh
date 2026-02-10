@@ -16,4 +16,13 @@ if [ ! -d "$ABS_CONFIG_DIR" ]; then
   echo "✅ FileBrowser directory prepared."
 fi
 
+# Automate /opt/seedbox setup (prevent Docker from creating it as root)
+SEEDBOX_DIR="/opt/seedbox"
+if [ ! -d "$SEEDBOX_DIR" ] || [ "$(stat -c '%u:%g' "$SEEDBOX_DIR" 2>/dev/null)" != "1000:1000" ]; then
+  echo "📂 Creating/Fixing $SEEDBOX_DIR..."
+  mkdir -p "$SEEDBOX_DIR/downloads"
+  chown -R 1000:1000 "$SEEDBOX_DIR"
+  echo "✅ $SEEDBOX_DIR created and ownership set to 1000:1000."
+fi
+
 

@@ -15,28 +15,11 @@
 
 ### Phase 1: One-Time Setup 🏗️
 
-We need to create the folders where your files will live. Run this **exact block** in your terminal:
-
 ```bash
-# 1. Create directory structure with proper ownership
-sudo mkdir -p /opt/seedbox/downloads
-sudo mkdir -p /opt/seedbox/config
-sudo chown -R 1000:1000 /opt/seedbox
-
-# 2. Create the FileBrowser database file
-touch /opt/seedbox/filebrowser.db
-
-# 3. CRITICAL: Grant wide permissions so the container can write to it
-chmod 666 /opt/seedbox/filebrowser.db
-
-# 4. Initialize the database schema
+# 1. Create the admin user (User: admin / Pass: adminadmin1234)
+# Note: Directory structure (/opt/seedbox) is now auto-created by the deploy script.
 docker run --rm \
-  -v /opt/seedbox/filebrowser.db:/database.db \
-  filebrowser/filebrowser config init
-
-# 5. Create the admin user (User: admin / Pass: adminadmin1234)
-docker run --rm \
-  -v /opt/seedbox/filebrowser.db:/database.db \
+  -v /root/my-vps-stack/config/fb/filebrowser.db:/database.db \
   filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
 ```
 
