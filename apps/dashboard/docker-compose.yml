@@ -4,6 +4,6 @@ services:
     container_name: dashboard
     restart: always
     volumes:
-      - /root/my-vps-stack/config/dashboard:/usr/share/nginx/html:ro
+      - ./index.html:/usr/share/nginx/html/index.html:ro
     ports:
       - "8090:80"
