@@ -42,12 +42,12 @@ my-vps-stack/
 | :-------------------- | :--------- | :---------------------------- | :------------------------- |
 | **Dashboard**         | home.\*    | Auto-generated app launcher   | _(No setup needed)_        |
 | **Portainer**         | docker.\*  | Docker management UI          | _(Setup on first launch)_  |
-| **Uptime Kuma**       | status.\*  | Service monitoring            | _(Setup on first launch)_  |
-| **FileBrowser**       | drive.\*   | File manager / Streamer       | admin / adminadmin1234     |
-| **qBittorrent**       | seed.\*    | Torrent client                | _(Check docker logs)_      |
-| **Glances**           | monitor.\* | Real-time system monitor      | _(Open access by default)_ |
-| **Jellyfin**          | play.\*    | Media Server                  | _(Setup on first launch)_  |
 | **Dockge**            | dockge.\*  | Docker Compose Manager        | _(Setup on first launch)_  |
+| **Uptime Kuma**       | status.\*  | Service monitoring            | _(Setup on first launch)_  |
+| **FileBrowser**       | drive.\*   | File manager / Streamer       | _(Check docker logs)_      |
+| **qBittorrent**       | seed.\*    | Torrent client                | _(Check docker logs)_      |
+| **Jellyfin**          | play.\*    | Media Server                  | _(Setup on first launch)_  |
+| **Glances**           | monitor.\* | Real-time system monitor      | _(Open access by default)_ |
 | **Telegram Bot**      | -          | Remote VPS management/status  | _(Token in secrets)_       |
 | **WhatsApp Bot**      | -          | Group commands via WhatsApp   | _(Session scanned via QR)_ |
 | **Watchtower**        | -          | Auto-updates containers       | _(No UI, runs at 4 AM)_    |
@@ -56,10 +56,10 @@ my-vps-stack/
 > [!TIP]
 > **Archived Apps:** The following apps are in `apps/.archive/` and excluded from builds:
 >
-> - `n8n` - Workflow automation
+> - `changedetection` - Website change monitoring
 > - `homarr` - Dashboard alternative
 > - `it-tools` - Developer utilities
-> - `changedetection` - Website change monitoring
+> - `n8n` - Workflow automation
 > - `stirling-pdf` - PDF manipulation tools
 >
 > Move folders out of `.archive/` to re-enable them.
@@ -259,6 +259,7 @@ docker ps
 
 # View logs
 docker logs filebrowser
+docker logs qbittorrent
 
 # Hard reset
 docker compose down

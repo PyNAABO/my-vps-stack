@@ -3,10 +3,13 @@ services:
     image: filebrowser/filebrowser
     container_name: filebrowser
     user: ${PUID:-1000}:${PGID:-1000}
+    environment:
+      - FB_DATABASE=/config/filebrowser.db
+      - FB_ROOT=/srv
+      - FB_LOG=stdout
     volumes:
       - /opt/seedbox:/srv
-      - ../../config/fb/filebrowser.db:/database.db
-      - ../../config/fb/settings.json:/config/settings.json
+      - ../../config/fb:/config
     ports:
       - "8081:80"
     restart: always

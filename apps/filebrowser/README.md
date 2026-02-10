@@ -7,10 +7,12 @@ A file management interface which can be used to upload, delete, preview, rename
 ## 🚀 Usage
 
 - **URL:** `https://drive.your-domain.com`
-- **Default Credentials:** `admin` / `adminadmin1234` (Created by `init.sh` on first run)
+- **Default Credentials:** Randomized on first startup. Check logs:
+  ```bash
+  docker logs filebrowser
+  ```
 
 ## 💾 Volumes
 
-- `config/fb/filebrowser.db`: Database file.
-- `config/fb/settings.json`: Configuration file.
+- `config/fb`: Configuration directory (Database & Settings).
 - `/srv`: Mapped to your root directory (careful!).
