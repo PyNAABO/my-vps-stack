@@ -22,8 +22,9 @@ EOF
 # Initialize FileBrowser DB if missing
 if [ ! -s "$ABS_CONFIG_DIR/filebrowser.db" ]; then
   touch "$ABS_CONFIG_DIR/filebrowser.db"
-  chown 1000:1000 "$ABS_CONFIG_DIR/filebrowser.db" "$ABS_CONFIG_DIR/settings.json"
+  chown -R 1000:1000 "$ABS_CONFIG_DIR"
   chmod 644 "$ABS_CONFIG_DIR/filebrowser.db"
+
   
   docker run --rm \
     -u 1000:1000 \
