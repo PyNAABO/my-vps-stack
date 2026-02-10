@@ -47,7 +47,6 @@ my-vps-stack/
 | **qBittorrent**       | seed.\*    | Torrent client                | _(Check docker logs)_      |
 | **Glances**           | monitor.\* | Real-time system monitor      | _(Open access by default)_ |
 | **Jellyfin**          | play.\*    | Media Server                  | _(Setup on first launch)_  |
-| **Stirling-PDF**      | pdf.\*     | PDF Manipulation Tools        | _(Open access by default)_ |
 | **Dockge**            | dockge.\*  | Docker Compose Manager        | _(Setup on first launch)_  |
 | **Telegram Bot**      | -          | Remote VPS management/status  | _(Token in secrets)_       |
 | **WhatsApp Bot**      | -          | Group commands via WhatsApp   | _(Session scanned via QR)_ |
@@ -61,6 +60,7 @@ my-vps-stack/
 > - `homarr` - Dashboard alternative
 > - `it-tools` - Developer utilities
 > - `changedetection` - Website change monitoring
+> - `stirling-pdf` - PDF manipulation tools
 >
 > Move folders out of `.archive/` to re-enable them.
 
