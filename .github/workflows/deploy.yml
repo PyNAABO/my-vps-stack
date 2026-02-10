@@ -109,4 +109,9 @@ jobs:
             sysctl -w net.core.rmem_max=2500000 || true
             docker compose up -d --build --remove-orphans --wait
             docker image prune -f
+
+            # 9. Force Restart Portainer (to reset security timeout)
+            echo "🔄 Restarting Portainer..."
+            docker restart portainer || true
+
             echo "✅ Deployment Completed!"
