@@ -10,10 +10,6 @@ npm-debug.log
 config/tunnel/
 config/fb/
 config/qbit/
-# Ignore Generated Config (Keep source files, ignore runtime data)
-config/tunnel/
-config/fb/
-config/qbit/
 config/dozzle/
 apps/dashboard/index.html
 
