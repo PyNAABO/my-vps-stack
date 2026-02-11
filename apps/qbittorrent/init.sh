@@ -84,5 +84,3 @@ if [ ! -d "$DOWNLOADS_DIR" ]; then
   mkdir -p "$DOWNLOADS_DIR"
 fi
 chown -R 1000:1000 "$DATA_DIR"
-
-
