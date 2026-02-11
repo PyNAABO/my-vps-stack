@@ -38,19 +38,19 @@ my-vps-stack/
 
 ## **🛠️ The Stack**
 
-| App                   | Subdomain  | Description                   | Default Credentials        |
-| :-------------------- | :--------- | :---------------------------- | :------------------------- |
-| **Dashboard**         | home.\*    | Auto-generated app launcher   | _(No setup needed)_        |
-| **Portainer**         | docker.\*  | Docker management UI          | _(Setup on first launch)_  |
-| **Uptime Kuma**       | status.\*  | Service monitoring            | _(Setup on first launch)_  |
-| **FileBrowser**       | drive.\*   | File manager / Streamer       | _(Check docker logs)_      |
-| **qBittorrent**       | seed.\*    | Torrent client                | _(Check docker logs)_      |
-| **Jellyfin**          | play.\*    | Media Server                  | _(Setup on first launch)_  |
-| **Glances**           | monitor.\* | Real-time system monitor      | _(Open access by default)_ |
-| **Telegram Bot**      | -          | Remote VPS management/status  | _(Token in secrets)_       |
-| **WhatsApp Bot**      | -          | Group commands via WhatsApp   | _(Session scanned via QR)_ |
-| **Watchtower**        | -          | Auto-updates containers       | _(No UI, runs at 4 AM)_    |
-| **Cloudflare Tunnel** | -          | Exposes all services securely | _(Auto-configured)_        |
+| App             | Subdomain | Description                 | Default Credentials       |
+| :-------------- | :-------- | :-------------------------- | :------------------------ |
+| **Dashboard**   | home.\*   | Auto-generated app launcher | _(No setup needed)_       |
+| **Portainer**   | docker.\* | Docker management UI        | _(Setup on first launch)_ |
+| **Uptime Kuma** | status.\* | Service monitoring          | _(Setup on first launch)_ |
+| **FileBrowser** | drive.\*  | File manager / Streamer     | _(Check docker logs)_     |
+| **qBittorrent** | seed.\*   | Torrent client              | _(Check docker logs)_     |
+
+| **Glances** | monitor.\* | Real-time system monitor | _(Open access by default)_ |
+| **Telegram Bot** | - | Remote VPS management/status | _(Token in secrets)_ |
+| **WhatsApp Bot** | - | Group commands via WhatsApp | _(Session scanned via QR)_ |
+| **Watchtower** | - | Auto-updates containers | _(No UI, runs at 4 AM)_ |
+| **Cloudflare Tunnel** | - | Exposes all services securely | _(Auto-configured)_ |
 
 > [!TIP]
 > **Archived Apps:** The following apps are in `apps/.archive/` and excluded from builds:
@@ -60,6 +60,7 @@ my-vps-stack/
 > - `homarr` - Dashboard alternative
 > - `it-tools` - Developer utilities
 > - `n8n` - Workflow automation
+> - `jellyfin` - Media Server
 > - `stirling-pdf` - PDF manipulation tools
 >
 > Move folders out of `.archive/` to re-enable them.

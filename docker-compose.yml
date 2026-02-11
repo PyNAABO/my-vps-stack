@@ -8,7 +8,7 @@ include:
   - apps/dockge/docker-compose.yml
   - apps/filebrowser/docker-compose.yml
   - apps/glances/docker-compose.yml
-  - apps/jellyfin/docker-compose.yml
+
   - apps/portainer/docker-compose.yml
   - apps/qbittorrent/docker-compose.yml
   - apps/telegram-bot/docker-compose.yml
