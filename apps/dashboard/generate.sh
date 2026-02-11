@@ -51,11 +51,19 @@ for ingress_file in apps/*/ingress.yml; do
   hostname=$(echo "$hostname" | sed 's/[<>&"'"'"']//g')
   
   icon=$(get_icon "$app_name")
+  
+  # Check if icon is FontAwesome class (contains "fa-")
+  if [[ "$icon" == *"fa-"* ]]; then
+    icon_html="<i class=\"${icon}\"></i>"
+  else
+    icon_html="${icon}"
+  fi
+
   display_name=$(echo "$app_name" | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g' | sed 's/[<>&"'"'"']//g')
   
   cat >> "$TILES_FILE" << TILE
     <a href="https://${hostname}.${DOMAIN}" class="tile" target="_blank">
-      <div class="tile-icon">${icon}</div>
+      <div class="tile-icon">${icon_html}</div>
       <div class="tile-name">${display_name}</div>
     </a>
 TILE
