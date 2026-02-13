@@ -1,4 +1,4 @@
-name: Deploy to VPS
+name: Deploy to Home Lab
 
 on:
   push:
@@ -8,96 +8,105 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
-        env:
-          TUNNEL_CREDENTIALS: ${{ secrets.TUNNEL_CREDENTIALS }}
-        with:
-          envs: TUNNEL_CREDENTIALS
-          host: ${{ secrets.VPS_IP }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            # 0. Cold Start (Auto-clone if missing)
-            if [ ! -d "/root/my-vps-stack" ]; then
-              echo "🚀 Cold Start: Cloning repository..."
-              git clone https://github.com/${{ github.repository }}.git /root/my-vps-stack
-            fi
-            cd /root/my-vps-stack
+      # 1. Setup the Tunnel Connection
+      - name: Configure SSH with Cloudflare Auth
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          
+          # Install cloudflared
+          wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared
+          chmod +x /usr/local/bin/cloudflared
+          
+          # Configure SSH to use the Tunnel + Service Token
+          echo "Host lap801" >> ~/.ssh/config
+          echo "  HostName lap801.nabhan.co.in" >> ~/.ssh/config
+          echo "  User naabo" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
+          echo "  ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}" >> ~/.ssh/config
+          echo "StrictHostKeyChecking no" >> ~/.ssh/config
 
-            # 1. Update Code (force reset to handle local changes)
+      # 2. Execute the Deployment Script
+      - name: Deploy via SSH
+        run: |
+          # We pass secrets as environment variables into the SSH session
+          ssh lap801 "export TUNNEL_CREDENTIALS='${{ secrets.TUNNEL_CREDENTIALS }}'; \
+                      export DOMAIN='${{ secrets.DOMAIN }}'; \
+                      export TUNNEL_ID='${{ secrets.TUNNEL_ID }}'; \
+                      export TG_BOT_TOKEN='${{ secrets.TG_BOT_TOKEN }}'; \
+                      export ALLOWED_GROUP_ID='${{ secrets.ALLOWED_GROUP_ID }}'; \
+                      bash -s" << 'EOF'
+            
+            # --- START OF REMOTE SCRIPT ---
+            
+            # 0. Cold Start (Auto-clone if missing)
+            if [ ! -d "$HOME/my-vps-stack" ]; then
+              echo "🚀 Cold Start: Cloning repository..."
+              git clone https://github.com/${{ github.repository }}.git $HOME/my-vps-stack
+            fi
+            cd $HOME/my-vps-stack
+
+            # 1. Update Code
             git fetch origin main
             git reset --hard origin/main
 
             # 2. Setup Directories & Env
             mkdir -p config/tunnel config/fb config/qbit
-            : > .env  # Clear .env (safer than echo)
+            : > .env
 
-            # 3. Auto-generate docker-compose.yml from apps/*/docker-compose.yml
-            # Note: Dot-prefixed folders (.template, .archive) are automatically excluded
+            # 3. Auto-generate docker-compose.yml
             echo "# Auto-generated - DO NOT EDIT" > docker-compose.yml
-            echo "# Add/remove apps by adding/removing folders in apps/" >> docker-compose.yml
-            echo "" >> docker-compose.yml
             echo "include:" >> docker-compose.yml
             for app_dir in apps/*/; do
-              # Check for standard docker-compose.yml
               if [ -f "${app_dir}docker-compose.yml" ]; then
                 echo "  - ${app_dir}docker-compose.yml" >> docker-compose.yml
                 echo "  ✓ Included: ${app_dir}docker-compose.yml"
-              # Check for new standard compose.yaml (e.g. created by Dockge)
               elif [ -f "${app_dir}compose.yaml" ]; then
                 echo "  - ${app_dir}compose.yaml" >> docker-compose.yml
                 echo "  ✓ Included: ${app_dir}compose.yaml"
               fi
             done
 
-            # 4. Generate Tunnel Config from apps/*/ingress.yml
-            if [ -n "${{ secrets.DOMAIN }}" ] && [ -n "${{ secrets.TUNNEL_CREDENTIALS }}" ]; then
+            # 4. Generate Tunnel Config
+            if [ -n "$DOMAIN" ] && [ -n "$TUNNEL_CREDENTIALS" ]; then
               echo "✅ Generating Tunnel Config..."
               echo "$TUNNEL_CREDENTIALS" > config/tunnel/cert.json
               
-              # Build tunnel config header
-              echo "tunnel: ${{ secrets.TUNNEL_ID }}" > config/tunnel/config.yml
+              echo "tunnel: $TUNNEL_ID" > config/tunnel/config.yml
               echo "credentials-file: /etc/cloudflared/cert.json" >> config/tunnel/config.yml
               echo "ingress:" >> config/tunnel/config.yml
-              
-              # Dynamically add ingress rules from each app's ingress.yml
 
-              # Install yq pinned version
-              if ! command -v yq &>/dev/null; then
-                wget -qO /usr/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 && chmod +x /usr/bin/yq
+              # Install yq locally (no sudo needed)
+              mkdir -p $HOME/bin
+              if [ ! -f "$HOME/bin/yq" ]; then
+                wget -qO $HOME/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 && chmod +x $HOME/bin/yq
               fi
-              
-              # Note: Dot-prefixed folders (.template, .archive) are automatically excluded
+              export PATH=$HOME/bin:$PATH
+
               for ingress_file in apps/*/ingress.yml; do
                 if [ -f "$ingress_file" ]; then
                   hostname=$(yq '.hostname' "$ingress_file")
                   service=$(yq '.service' "$ingress_file")
-                  echo "  - hostname: ${hostname}.${{ secrets.DOMAIN }}" >> config/tunnel/config.yml
+                  echo "  - hostname: ${hostname}.${DOMAIN}" >> config/tunnel/config.yml
                   echo "    service: ${service}" >> config/tunnel/config.yml
                   echo "  ✓ Added route: ${hostname} -> ${service}"
                 fi
               done
               
-              # Add catch-all 404
+              # Catch-all
               echo "  - service: http_status:404" >> config/tunnel/config.yml
-
-              echo "DOMAIN_NAME=${{ secrets.DOMAIN }}" >> .env
               
-              # Force tunnel to reload new config
-              docker restart my-vps-stack-tunnel 2>/dev/null || true
+              echo "DOMAIN_NAME=${DOMAIN}" >> .env
             else
-              echo "⚠️ Fallback Mode"
-              echo "DOMAIN_NAME=localhost" >> .env
+               echo "DOMAIN_NAME=localhost" >> .env
             fi
 
-            # 5. Inject Bot Configs
-            echo "TG_BOT_TOKEN=${{ secrets.TG_BOT_TOKEN }}" >> .env
-            echo "ALLOWED_GROUP_ID=${{ secrets.ALLOWED_GROUP_ID }}" >> .env
+            # 5. Inject Secrets
+            echo "TG_BOT_TOKEN=$TG_BOT_TOKEN" >> .env
+            echo "ALLOWED_GROUP_ID=$ALLOWED_GROUP_ID" >> .env
 
-
-            # 7. Run init scripts for each app (first-time setup)
-            # Note: Dot-prefixed folders (.template, .archive) are automatically excluded
+            # 7. Run init scripts
             for init_script in apps/*/init.sh; do
               if [ -f "$init_script" ]; then
                 echo "🔧 Running $init_script"
@@ -105,13 +114,17 @@ jobs:
               fi
             done
 
-            # 8. Deployment
-            sysctl -w net.core.rmem_max=2500000 || true
+            # 8. Deployment (Using Docker Group, so no sudo needed hopefully)
+            # Note: Sysctl usually requires root. If this fails, we skip it.
+            # echo "password" | sudo -S sysctl... (Skipping for security/headless)
+            
             docker compose up -d --build --remove-orphans --wait
             docker image prune -f
 
-            # 9. Force Restart Portainer (to reset security timeout)
-            echo "🔄 Restarting Portainer..."
+            # 9. Restart Portainer
             docker restart portainer || true
-
+            
             echo "✅ Deployment Completed!"
+            
+            # --- END OF REMOTE SCRIPT ---
+          EOF
