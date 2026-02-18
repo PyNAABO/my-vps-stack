@@ -106,7 +106,7 @@ jobs:
             echo "TG_BOT_TOKEN=$TG_BOT_TOKEN" >> .env
             echo "ALLOWED_GROUP_ID=$ALLOWED_GROUP_ID" >> .env
 
-            # 7. Run init scripts
+            # 6. Run init scripts
             for init_script in apps/*/init.sh; do
               if [ -f "$init_script" ]; then
                 echo "🔧 Running $init_script"
@@ -114,14 +114,14 @@ jobs:
               fi
             done
 
-            # 8. Deployment (Using Docker Group, so no sudo needed hopefully)
+            # 7. Deployment
             # Note: Sysctl usually requires root. If this fails, we skip it.
             # echo "password" | sudo -S sysctl... (Skipping for security/headless)
             
             docker compose up -d --build --remove-orphans --wait
             docker image prune -f
 
-            # 9. Restart Portainer
+            # 8. Restart Portainer
             docker restart portainer || true
             
             echo "✅ Deployment Completed!"

@@ -11,4 +11,4 @@ A fancy self-hosted monitoring tool that is like "Uptime Robot".
 
 ## 💾 Volumes
 
-- `uptime-kuma`: Stores all monitoring data and configuration.
+- `uptime-kuma-data`: Stores all monitoring data and configuration.

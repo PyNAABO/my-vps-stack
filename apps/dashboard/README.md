@@ -24,33 +24,38 @@ The `index.html` is **auto-generated** during deployment by `generate.sh`.
 ## 🎨 Customization
 
 - **Template:** Edit `template.html` to change the layout, CSS, or static headers.
-- **Icons:** Edit `icons.conf` to add or modify emoji icons for apps.
+- **Icons:** Edit `icons.conf` to add or modify icons for apps.
 
 ### Adding Custom Icons
 
 Edit `icons.conf` and add entries in the format:
 
 ```
-app_name=emoji
+app_name=fa-solid fa-icon-name
 ```
 
 Example:
 
 ```
-my-custom-app=🚀
-database=🗄️
-ai-service=🧠
+my-custom-app=fa-solid fa-rocket
+database=fa-solid fa-database
+ai-service=fa-solid fa-brain
 ```
+
+Icons use [FontAwesome 6](https://fontawesome.com/icons) classes. Emoji icons are also supported as a fallback.
 
 ## 📐 Layout Behavior
 
-- **Square Tiles**: Tiles maintain a roughly square aspect ratio.
-- **Responsive Columns**: The number of columns adjusts automatically (auto-fit).
-- **Mobile Friendly**: optimized padding and sizing for smaller screens.
+- **3-Column Grid**: Desktop uses a `1fr 1.6fr 1fr` layout with a prominent center column.
+- **Featured Tile**: The last-used app is automatically promoted to a large featured tile in the center.
+- **Responsive**: Collapses to a 2-column grid on mobile (≤900px).
+- **Mobile Friendly**: Optimized padding and sizing for smaller screens.
 
 ## 🎯 Technical Details
 
-- Uses modern **CSS Grid** (`repeat(auto-fit, minmax(...))`)
-- **Glassmorphism** with backdrop-filter
-- **Performance Optimized** animations (transform/opacity)
+- Uses modern **CSS Grid** with a fixed 3-column layout
+- **Glassmorphism** with backdrop-filter and animated mesh background
+- **3D Tilt** interactions on hover (perspective-based transforms)
+- **"Last Used" memory** via `localStorage` for the featured tile
+- **Light/Dark mode** via `prefers-color-scheme` media query
 - **No heavy JS dependencies** (Micro-interactions use lightweight vanilla JS)

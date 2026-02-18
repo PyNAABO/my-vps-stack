@@ -15,7 +15,6 @@ apps/dashboard/index.html
 
 # Ignore Local
 dev_log.md
-.agent/
 
 # Ignore Heavy Data
 downloads/

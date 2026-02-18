@@ -10,7 +10,7 @@
 - **/*.part*
 
 # --- EXCLUDE HEAVY MEDIA (Optional - Uncomment if you want to skip downloads) ---
-# - Seedbox/downloads/**
+# - vps-data/downloads/**
 
 # --- INCLUDE EVERYTHING ELSE ---
 + /**

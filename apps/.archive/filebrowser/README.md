@@ -15,4 +15,4 @@ A file management interface which can be used to upload, delete, preview, rename
 ## 💾 Volumes
 
 - `config/fb`: Configuration directory (Database & Settings).
-- `/srv`: Mapped to your root directory (careful!).
+- `/srv`: Mapped to `../vps-data` (shared data directory, sibling to repo).

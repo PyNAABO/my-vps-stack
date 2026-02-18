@@ -1,4 +1,11 @@
-﻿# 📦 Ultimate Seedbox Guide
+# 📦 Ultimate Seedbox Guide
+
+> [!NOTE]
+> **qBittorrent** and **FileBrowser** are currently archived. To use this guide, first move them from `apps/.archive/` to `apps/`:
+> ```bash
+> mv apps/.archive/qbittorrent apps/
+> mv apps/.archive/filebrowser apps/
+> ```
 
 ## The Modern, Automated Setup
 
@@ -17,7 +24,7 @@
 
 ```bash
 # 1. Create the admin user (User: admin / Pass: adminadmin1234)
-# Note: Directory structure (/opt/seedbox) is now auto-created by the deploy script.
+# Note: Directory structure (vps-data/) is auto-created by the deploy script.
 docker run --rm \
   -v /root/my-vps-stack/config/fb/filebrowser.db:/database.db \
   filebrowser/filebrowser users add admin adminadmin1234 --perm.admin
@@ -61,8 +68,8 @@ docker run --rm \
 
 ### 💡 How It Works
 
-1. **Shared Storage:** Both apps are "mounted" to the same folder on your VPS (`/opt/seedbox/downloads`).
+1. **Shared Storage:** Both apps are "mounted" to the same `vps-data` folder on your VPS (sibling to the repository).
 2. **The Flow:**
    - **qBittorrent** downloads a file to `/downloads` (inside the container).
-   - This appears instantly in `/opt/seedbox/downloads` (on your VPS).
+   - This appears instantly in `../vps-data/downloads` (on your VPS).
    - **FileBrowser** reads this same folder, allowing you to stream or download the file immediately.
