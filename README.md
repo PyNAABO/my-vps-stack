@@ -38,14 +38,14 @@ my-vps-stack/
 
 ## **🛠️ The Stack**
 
-| App             | Subdomain | Description                 | Default Credentials       |
-| :-------------- | :-------- | :-------------------------- | :------------------------ |
-| **Dashboard**   | home.\*   | Auto-generated app launcher | _(No setup needed)_       |
-| **Portainer**   | docker.\* | Docker management UI        | _(Setup on first launch)_ |
-| **Uptime Kuma** | status.\* | Service monitoring          | _(Setup on first launch)_ |
-| **Telegram Bot**      | -          | Remote VPS management/status | _(Token in secrets)_       |
-| **WhatsApp Bot**      | -          | Group commands via WhatsApp  | _(Session scanned via QR)_ |
-| **Cloudflare Tunnel** | -          | Exposes all services securely| _(Auto-configured)_        |
+| App                   | Subdomain | Description                   | Default Credentials        |
+| :-------------------- | :-------- | :---------------------------- | :------------------------- |
+| **Dashboard**         | home.\*   | Auto-generated app launcher   | _(No setup needed)_        |
+| **Portainer**         | docker.\* | Docker management UI          | _(Setup on first launch)_  |
+| **Uptime Kuma**       | status.\* | Service monitoring            | _(Setup on first launch)_  |
+| **Telegram Bot**      | -         | Remote VPS management/status  | _(Token in secrets)_       |
+| **WhatsApp Bot**      | -         | Group commands via WhatsApp   | _(Session scanned via QR)_ |
+| **Cloudflare Tunnel** | -         | Exposes all services securely | _(Auto-configured)_        |
 
 > [!TIP]
 > **Archived Apps:** The following apps are in `apps/.archive/` and excluded from builds:
@@ -71,14 +71,14 @@ my-vps-stack/
 
 Internal ports used by each service (accessible only via Cloudflare Tunnel):
 
-| App | Internal Port | External Access |
-| :-- | :------------ | :---------------- |
-| **Dashboard** | `8090` | `home.*` subdomain |
-| **Portainer** | `9000` | `docker.*` subdomain |
-| **Uptime Kuma** | `3001` | `status.*` subdomain |
-| **Telegram Bot** | - | N/A (Bot API) |
-| **WhatsApp Bot** | - | N/A (WhatsApp Web) |
-| **Cloudflare Tunnel** | - | N/A (Outbound only) |
+| App                   | Internal Port | External Access      |
+| :-------------------- | :------------ | :------------------- |
+| **Dashboard**         | `8090`        | `home.*` subdomain   |
+| **Portainer**         | `9000`        | `docker.*` subdomain |
+| **Uptime Kuma**       | `3001`        | `status.*` subdomain |
+| **Telegram Bot**      | -             | N/A (Bot API)        |
+| **WhatsApp Bot**      | -             | N/A (WhatsApp Web)   |
+| **Cloudflare Tunnel** | -             | N/A (Outbound only)  |
 
 > [!NOTE]
 > No ports are exposed to the internet directly. All traffic flows through the Cloudflare Tunnel.
@@ -195,13 +195,13 @@ Apps get a default 🔗 icon. For custom icons:
 
 ### System Requirements
 
-| Component | Minimum | Recommended | Notes |
-| :-------- | :------ | :---------- | :---- |
-| **OS** | Ubuntu 22.04 LTS | Ubuntu 24.04 LTS | Debian-based distros also work |
-| **RAM** | 2 GB | 4 GB+ | More RAM needed for media apps |
-| **CPU** | 1 vCPU | 2 vCPUs | ARM64 or x86_64 architecture |
-| **Storage** | 20 GB | 50 GB+ | SSD strongly recommended |
-| **Network** | 100 Mbps | 1 Gbps | Unlimited bandwidth preferred |
+| Component   | Minimum          | Recommended      | Notes                          |
+| :---------- | :--------------- | :--------------- | :----------------------------- |
+| **OS**      | Ubuntu 22.04 LTS | Ubuntu 24.04 LTS | Debian-based distros also work |
+| **RAM**     | 2 GB             | 4 GB+            | More RAM needed for media apps |
+| **CPU**     | 1 vCPU           | 2 vCPUs          | ARM64 or x86_64 architecture   |
+| **Storage** | 20 GB            | 50 GB+           | SSD strongly recommended       |
+| **Network** | 100 Mbps         | 1 Gbps           | Unlimited bandwidth preferred  |
 
 ### Software Requirements
 
@@ -241,7 +241,9 @@ _The stack will start within seconds._
 
 1. **Install Docker** on your VPS.
 2. **Add Secrets** to GitHub (Settings → Secrets and variables → Actions):
-   - `SSH_PRIVATE_KEY`: SSH private key for your server
+   - `SSH_PRIVATE_KEY`: SSH private key for your server (must match authorized_keys on VPS)
+   - `SSH_HOSTNAME`: SSH hostname (e.g., `ssh.yourdomain.com` or IP)
+   - `SSH_USER`: SSH username (default: `root`)
    - `CF_CLIENT_ID`: Cloudflare Access Service Token ID
    - `CF_CLIENT_SECRET`: Cloudflare Access Service Token Secret
    - `DOMAIN`: Your domain
@@ -345,58 +347,75 @@ docker compose up -d
 ### General Questions
 
 **Q: Do I need to open any ports on my VPS?**
+
 > A: No! Only port 22 (SSH) needs to be open. All web traffic flows through the Cloudflare Tunnel, which creates an outbound-only connection.
 
 **Q: Can I use this on a VPS behind NAT or with a dynamic IP?**
+
 > A: Yes! The Cloudflare Tunnel works from anywhere with an internet connection, regardless of your network configuration.
 
 **Q: Is my data secure?**
+
 > A: Yes. All traffic is encrypted via HTTPS (provided by Cloudflare). Additionally, Cloudflare Access provides an authentication layer before services are accessible.
 
 **Q: How much does this cost to run?**
+
 > A: The software is free and open-source. You only pay for your VPS hosting (typically $5-20/month) and your domain name (~$10/year).
 
 ### Deployment Questions
 
 **Q: What happens if the deployment fails?**
+
 > A: Check the GitHub Actions logs for detailed error messages. Common issues include:
+>
 > - Missing GitHub Secrets
 > - Incorrect SSH key configuration
 > - Port conflicts between apps
 
 **Q: Can I deploy manually without GitHub Actions?**
+
 > A: Yes! Simply clone the repo on your VPS and run `docker compose up -d`. However, you'll need to manually configure the Cloudflare Tunnel.
 
 **Q: How do I update the stack?**
+
 > A: Changes pushed to the `main` branch are automatically deployed. For manual updates, run `git pull && docker compose up -d`.
 
 **Q: Can I add my own custom apps?**
+
 > A: Absolutely! Copy the `apps/.template` folder, customize the `docker-compose.yml`, and push your changes. See the "Adding a New App" section above for details.
 
 ### Application Questions
 
 **Q: How do I reset an app's password?**
+
 > A: Most apps store credentials in their data directory. Check the app's specific README in `apps/<app-name>/README.md` for reset instructions.
 
 **Q: Where are my downloaded files stored?**
+
 > A: Downloads go to `../vps-data/downloads/` (relative to the repository). This is a shared directory accessible by FileBrowser and qBittorrent.
 
 **Q: Can I access services locally without going through Cloudflare?**
+
 > A: Yes, you can access services directly via their internal ports (e.g., `http://localhost:8090` for Dashboard). See the "Network Ports" table above for the full list.
 
 **Q: How do I back up my data?**
+
 > A: Use the included `scripts/cloud_backup.sh` script, which backs up the entire `vps-data` directory to Google Drive via rclone.
 
 ### Troubleshooting
 
 **Q: My app shows "502 Bad Gateway"**
+
 > A: This usually means the service isn't running. Check `docker ps` to see if the container is up, and check `docker logs <container-name>` for errors.
 
 **Q: I get "permission denied" errors**
+
 > A: Data directories must be owned by user 1000:1000. Run: `sudo chown -R 1000:1000 ../vps-data/`
 
 **Q: Changes I made on the VPS disappeared**
+
 > A: The deploy workflow runs `git reset --hard`, which wipes local changes. Always commit changes back to the repository before pushing.
 
 **Q: How do I view container logs?**
+
 > A: Use `docker logs <container-name>`. For follow mode (like `tail -f`), use `docker logs -f <container-name>`.

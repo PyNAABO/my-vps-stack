@@ -14,15 +14,15 @@ jobs:
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          
+
           # Install cloudflared
           wget -q https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O /usr/local/bin/cloudflared
           chmod +x /usr/local/bin/cloudflared
-          
+
           # Configure SSH to use the Tunnel + Service Token
-          echo "Host lap801" >> ~/.ssh/config
-          echo "  HostName lap801.nabhan.co.in" >> ~/.ssh/config
-          echo "  User naabo" >> ~/.ssh/config
+          echo "Host vps" >> ~/.ssh/config
+          echo "  HostName ${{ secrets.SSH_HOSTNAME }}" >> ~/.ssh/config
+          echo "  User ${{ secrets.SSH_USER || 'root' }}" >> ~/.ssh/config
           echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
           echo "  ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}" >> ~/.ssh/config
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
@@ -31,7 +31,7 @@ jobs:
       - name: Deploy via SSH
         run: |
           # We pass secrets as environment variables into the SSH session
-          ssh lap801 "export TUNNEL_CREDENTIALS='${{ secrets.TUNNEL_CREDENTIALS }}'; \
+          ssh vps "export TUNNEL_CREDENTIALS='${{ secrets.TUNNEL_CREDENTIALS }}'; \
                       export DOMAIN='${{ secrets.DOMAIN }}'; \
                       export TUNNEL_ID='${{ secrets.TUNNEL_ID }}'; \
                       export TG_BOT_TOKEN='${{ secrets.TG_BOT_TOKEN }}'; \
