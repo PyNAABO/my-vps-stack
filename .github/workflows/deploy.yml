@@ -8,7 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. Setup the Tunnel Connection
+      # 1. Setup the Tunnel Connection (COPIED FROM YOUR WORKING BASIC SCRIPT)
       - name: Configure SSH with Cloudflare Auth
         run: |
           mkdir -p ~/.ssh/
@@ -20,9 +20,10 @@ jobs:
           chmod +x /usr/local/bin/cloudflared
 
           # Configure SSH to use the Tunnel + Service Token
-          echo "Host vps" >> ~/.ssh/config
-          echo "  HostName ${{ secrets.SSH_HOSTNAME }}" >> ~/.ssh/config
-          echo "  User ${{ secrets.SSH_USER || 'root' }}" >> ~/.ssh/config
+          # WE REMOVED THE MISSING SECRETS AND HARDCODED THE WORKING VALUES HERE:
+          echo "Host lap801" >> ~/.ssh/config
+          echo "  HostName lap801.nabhan.co.in" >> ~/.ssh/config
+          echo "  User naabo" >> ~/.ssh/config
           echo "  IdentityFile ~/.ssh/id_ed25519" >> ~/.ssh/config
           echo "  ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h --id ${{ secrets.CF_CLIENT_ID }} --secret ${{ secrets.CF_CLIENT_SECRET }}" >> ~/.ssh/config
           echo "StrictHostKeyChecking no" >> ~/.ssh/config
@@ -31,7 +32,8 @@ jobs:
       - name: Deploy via SSH
         run: |
           # We pass secrets as environment variables into the SSH session
-          ssh vps "export TUNNEL_CREDENTIALS='${{ secrets.TUNNEL_CREDENTIALS }}'; \
+          # NOTE: We use 'ssh lap801' to match the config above
+          ssh lap801 "export TUNNEL_CREDENTIALS='${{ secrets.TUNNEL_CREDENTIALS }}'; \
                       export DOMAIN='${{ secrets.DOMAIN }}'; \
                       export TUNNEL_ID='${{ secrets.TUNNEL_ID }}'; \
                       export TG_BOT_TOKEN='${{ secrets.TG_BOT_TOKEN }}'; \
@@ -43,6 +45,7 @@ jobs:
             # 0. Cold Start (Auto-clone if missing)
             if [ ! -d "$HOME/my-vps-stack" ]; then
               echo "🚀 Cold Start: Cloning repository..."
+              # Assuming public repo or SSH key already on VPS
               git clone https://github.com/${{ github.repository }}.git $HOME/my-vps-stack
             fi
             cd $HOME/my-vps-stack
@@ -115,13 +118,12 @@ jobs:
             done
 
             # 7. Deployment
-            # Note: Sysctl usually requires root. If this fails, we skip it.
-            # echo "password" | sudo -S sysctl... (Skipping for security/headless)
+            # Note: We skip sysctl to avoid sudo password issues in headless mode
             
             docker compose up -d --build --remove-orphans --wait
             docker image prune -f
 
-            # 8. Restart Portainer
+            # 8. Restart Portainer (Optional - keeps it healthy)
             docker restart portainer || true
             
             echo "✅ Deployment Completed!"
