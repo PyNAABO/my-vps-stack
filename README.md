@@ -1,4 +1,4 @@
-# **🚀 Modular VPS Stack**
+# **🚀 Modular VPS/home-lab Stack**
 
 A **modular, plug-and-play** Infrastructure as Code (IaC) configuration for deploying self-healing containerized applications on any Linux VPS.
 
